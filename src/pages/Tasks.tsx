@@ -10,18 +10,20 @@ import {
   ActionIcon,
   EmptyState,
   Checkbox,
+  Box,
 } from 'myk-library'
 import { DataTable } from 'myk-library'
 import type { ColumnDef } from 'myk-library'
 import { Plus, Pencil, Trash2, ListTodo } from 'lucide-react'
 import styled from 'styled-components'
 import { useTripStore } from '@/stores/tripStore'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 import type { TripTask } from '@/types/task'
 import { formatDateISO, formatDateShort } from '@/utils/date'
 import TaskFormModal from '@/components/tasks/TaskFormModal'
 
-const PageWrapper = styled.div`
-  padding: 24px;
+const PageWrapper = styled.div<{ $mobile: boolean }>`
+  padding: ${({ $mobile }) => ($mobile ? '12px' : '24px')};
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -43,6 +45,7 @@ export default function Tasks() {
   const [assignee, setAssignee] = useState('')
   const [query, setQuery] = useState('')
 
+  const { isMobile } = useBreakpoint()
   const todayISO = useMemo(() => formatDateISO(new Date()), [])
 
   const familyById = useMemo(() => {
@@ -185,7 +188,7 @@ export default function Tasks() {
   if (!trip) return null
 
   return (
-    <PageWrapper>
+    <PageWrapper $mobile={isMobile}>
       <Stack direction="row" align="center" justify="between" spacing="md">
         <Stack direction="row" align="center" spacing="sm">
           <Typography variant="h5" style={{ margin: 0 }}>
@@ -207,7 +210,7 @@ export default function Tasks() {
         </Button>
       </Stack>
 
-      <Stack direction="row" spacing="md" align="end">
+      <Stack direction={isMobile ? 'column' : 'row'} spacing="md" align={isMobile ? 'stretch' : 'end'}>
         <Input
           label="חיפוש"
           value={query}
@@ -220,7 +223,7 @@ export default function Tasks() {
           label="סטטוס"
           value={status}
           onChange={e => setStatus(e.target.value as StatusFilter)}
-          style={{ width: 160 }}
+          style={isMobile ? {} : { width: 160 }}
         >
           <option value="open">פתוחות</option>
           <option value="done">בוצעו</option>
@@ -232,7 +235,7 @@ export default function Tasks() {
             label="אחראי/ת"
             value={assignee}
             onChange={e => setAssignee(e.target.value)}
-            style={{ width: 200 }}
+            style={isMobile ? {} : { width: 200 }}
           >
             <option value="">הכול</option>
             {trip.family.map(m => (
@@ -250,20 +253,22 @@ export default function Tasks() {
           onAction={() => setShowAdd(true)}
         />
       ) : (
-        <DataTable
-          columns={columns}
-          data={filteredTasks}
-          variant="striped"
-          size="sm"
-          emptyState={(
-            <EmptyState
-              title="אין תוצאות"
-              description="נסה לשנות את החיפוש או הפילטרים"
-              actionText="נקה פילטרים"
-              onAction={() => { setQuery(''); setStatus('open'); setAssignee('') }}
-            />
-          )}
-        />
+        <Box style={{ overflowX: 'auto' }}>
+          <DataTable
+            columns={columns}
+            data={filteredTasks}
+            variant="striped"
+            size="sm"
+            emptyState={(
+              <EmptyState
+                title="אין תוצאות"
+                description="נסה לשנות את החיפוש או הפילטרים"
+                actionText="נקה פילטרים"
+                onAction={() => { setQuery(''); setStatus('open'); setAssignee('') }}
+              />
+            )}
+          />
+        </Box>
       )}
 
       <TaskFormModal

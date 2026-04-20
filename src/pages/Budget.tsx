@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Stack, Grid, StatCard, Progress, Button, Badge, ActionIcon,
-  Alert, Typography, NumberInput, Select,
+  Alert, Typography, NumberInput, Select, Box,
 } from 'myk-library'
 import { DataTable } from 'myk-library'
 import type { ColumnDef } from 'myk-library'
 import { useTripStore, getTotalSpent, getBudgetByCategory } from '@/stores/tripStore'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 import { formatCurrency, CURRENCY_OPTIONS } from '@/utils/currency'
 import ExpenseFormModal from '@/components/budget/ExpenseFormModal'
 import type { BudgetItem } from '@/types/budget'
@@ -23,8 +24,8 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: '💰 אחר',
 }
 
-const PageWrapper = styled.div`
-  padding: 24px;
+const PageWrapper = styled.div<{ $mobile: boolean }>`
+  padding: ${({ $mobile }) => ($mobile ? '12px' : '24px')};
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -41,6 +42,8 @@ export default function Budget() {
   const [editBudget, setEditBudget] = useState(false)
   const [newTotal, setNewTotal] = useState(0)
   const [newCurrency, setNewCurrency] = useState('ILS')
+
+  const { isMobile, isTablet } = useBreakpoint()
 
   if (!trip) return null
 
@@ -72,7 +75,7 @@ export default function Budget() {
   }
 
   return (
-    <PageWrapper>
+    <PageWrapper $mobile={isMobile}>
       <Stack direction="row" align="center" justify="between">
         <Typography variant="h5" style={{ margin: 0 }}>💰 תקציב</Typography>
         <Button variant="primary" size="sm" onClick={() => setShowAdd(true)}>
@@ -89,7 +92,7 @@ export default function Budget() {
         </Alert>
       )}
 
-      <Grid columns={3} gap="md">
+      <Grid columns={isMobile ? 1 : isTablet ? 2 : 3} gap="md">
         <StatCard
           title="תקציב כולל"
           value={formatCurrency(totalBudget, currency)}
@@ -147,12 +150,14 @@ export default function Budget() {
             לא נוספו הוצאות עדיין
           </Typography>
         ) : (
-          <DataTable
-            columns={columns}
-            data={trip.budget.items}
-            variant="striped"
-            size="sm"
-          />
+          <Box style={{ overflowX: 'auto' }}>
+            <DataTable
+              columns={columns}
+              data={trip.budget.items}
+              variant="striped"
+              size="sm"
+            />
+          </Box>
         )}
       </Stack>
 

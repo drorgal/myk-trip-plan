@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Tabs, Stack, Card, Badge, ActionIcon, Button, EmptyState, Typography, Chip } from 'myk-library'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 import type { TabItem } from 'myk-library'
 import { useTripStore } from '@/stores/tripStore'
 import { formatCurrency } from '@/utils/currency'
@@ -13,8 +14,8 @@ import styled from 'styled-components'
 import { parseISO, format } from 'date-fns'
 import { he } from 'date-fns/locale'
 
-const PageWrapper = styled.div`
-  padding: 24px;
+const PageWrapper = styled.div<{ $mobile: boolean }>`
+  padding: ${({ $mobile }) => ($mobile ? '12px' : '24px')};
 `
 
 const formatDT = (dt: string) => {
@@ -39,6 +40,8 @@ export default function Travel() {
   const [showAddAcc, setShowAddAcc] = useState(false)
   const [editAcc, setEditAcc] = useState<Accommodation | undefined>()
   const [showGmail, setShowGmail] = useState(false)
+
+  const { isMobile } = useBreakpoint()
 
   if (!trip) return null
 
@@ -110,7 +113,7 @@ export default function Travel() {
   ]
 
   return (
-    <PageWrapper>
+    <PageWrapper $mobile={isMobile}>
       <Stack direction="row" justify="end" style={{ marginBottom: 8 }}>
         <Button size="sm" variant="ghost" onClick={() => setShowGmail(true)}>
           <Stack direction="row" spacing="xs" align="center">

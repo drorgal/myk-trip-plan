@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useParams, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import {
-  AppShell, Navbar, Sidebar,
+  AppShell, Navbar, Sidebar, Drawer,
   SidebarContent, SidebarNavItem, SidebarSection, SidebarSectionTitle,
   Stack, Badge, Typography, ActionIcon,
 } from 'myk-library'
 import { useTripStore } from '@/stores/tripStore'
 import styled from 'styled-components'
-import { Map, Wallet, Plane, Home, ListTodo, Users } from 'lucide-react'
+import { Map, Wallet, Plane, Home, ListTodo, Users, Menu } from 'lucide-react'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 const TripTitle = styled.div`
   font-weight: 600;
@@ -36,6 +37,13 @@ const FamilyRow = styled.div<{ $collapsed: boolean }>`
   ${({ $collapsed }) => $collapsed && 'justify-content: center; padding: 4px;'}
 `
 
+const DrawerNav = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+`
+
 const NavItems = [
   { label: 'לוח זמנים', path: 'itinerary', icon: <Map size={18} /> },
   { label: 'משפחה', path: 'family', icon: <Users size={18} /> },
@@ -52,6 +60,8 @@ export default function AppLayout() {
   const activeTripId = useTripStore(s => s.activeTripId)
   const setActiveTrip = useTripStore(s => s.setActiveTrip)
   const [collapsed, setCollapsed] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const { isTablet } = useBreakpoint()
 
   const trip = trips.find(t => t.id === id)
 
@@ -61,78 +71,148 @@ export default function AppLayout() {
     }
   }, [id, activeTripId, setActiveTrip])
 
+  // close drawer on navigation
+  useEffect(() => {
+    setDrawerOpen(false)
+  }, [location.pathname])
+
   if (!trip) return <Navigate to="/" replace />
 
   const currentPath = location.pathname.split('/').pop()
 
+  const sidebarContent = (
+    <SidebarContent>
+      <SidebarSection $collapsed={false}>
+        <SidebarSectionTitle $collapsed={false}>ניווט</SidebarSectionTitle>
+        {NavItems.map(item => (
+          <SidebarNavItem
+            key={item.path}
+            $active={currentPath === item.path}
+            $collapsed={false}
+            onClick={() => navigate(`/trip/${id}/${item.path}`)}
+            title={item.label}
+          >
+            <NavIcon>{item.icon}</NavIcon>
+            <NavLabel $collapsed={false}>{item.label}</NavLabel>
+          </SidebarNavItem>
+        ))}
+      </SidebarSection>
+
+      {trip.family.length > 0 && (
+        <SidebarSection $collapsed={false}>
+          <SidebarSectionTitle $collapsed={false}>משפחה</SidebarSectionTitle>
+          <FamilyRow $collapsed={false}>
+            {trip.family.map(m => (
+              <Typography key={m.id} variant="body1" title={m.name} style={{ fontSize: 22, cursor: 'default' }}>
+                {m.emoji}
+              </Typography>
+            ))}
+          </FamilyRow>
+        </SidebarSection>
+      )}
+    </SidebarContent>
+  )
+
   return (
-    <AppShell
-      fixedNavbar
-      navbarHeight={60}
-      sidebarWidth={collapsed ? 60 : 220}
-      navbar={
-        <Navbar height="sm">
-          <Stack direction="row" align="center" spacing="md" style={{ padding: '0 16px', height: '100%' }}>
-            <ActionIcon
-              onClick={() => navigate('/')}
-              title="חזרה לרשימת טיולים"
-              aria-label="חזרה לרשימת טיולים"
-              variant="subtle"
-              size="sm"
+    <>
+      <AppShell
+        fixedNavbar
+        navbarHeight={60}
+        sidebarWidth={isTablet ? 0 : collapsed ? 60 : 220}
+        navbar={
+          <Navbar height="sm">
+            <Stack direction="row" align="center" spacing="md" style={{ padding: '0 16px', height: '100%' }}>
+              {isTablet && (
+                <ActionIcon
+                  onClick={() => setDrawerOpen(true)}
+                  title="תפריט"
+                  aria-label="פתח תפריט"
+                  variant="subtle"
+                  size="sm"
+                >
+                  <Menu size={20} />
+                </ActionIcon>
+              )}
+              <ActionIcon
+                onClick={() => navigate('/')}
+                title="חזרה לרשימת טיולים"
+                aria-label="חזרה לרשימת טיולים"
+                variant="subtle"
+                size="sm"
+              >
+                <Home size={18} />
+              </ActionIcon>
+              <TripTitle>
+                <span>{trip.coverEmoji}</span>
+                <span>{trip.name}</span>
+              </TripTitle>
+              <Badge variant="info" size="sm">{trip.destination}</Badge>
+            </Stack>
+          </Navbar>
+        }
+        sidebar={
+          !isTablet ? (
+            <Sidebar
+              position="right"
+              collapsible
+              collapsedWidth={60}
+              withBorder
+              collapsed={collapsed}
+              onCollapse={setCollapsed}
             >
-              <Home size={18} />
-            </ActionIcon>
-            <TripTitle>
+              <SidebarContent>
+                <SidebarSection $collapsed={collapsed}>
+                  <SidebarSectionTitle $collapsed={collapsed}>ניווט</SidebarSectionTitle>
+                  {NavItems.map(item => (
+                    <SidebarNavItem
+                      key={item.path}
+                      $active={currentPath === item.path}
+                      $collapsed={collapsed}
+                      onClick={() => navigate(`/trip/${id}/${item.path}`)}
+                      title={item.label}
+                    >
+                      <NavIcon>{item.icon}</NavIcon>
+                      <NavLabel $collapsed={collapsed}>{item.label}</NavLabel>
+                    </SidebarNavItem>
+                  ))}
+                </SidebarSection>
+
+                {trip.family.length > 0 && (
+                  <SidebarSection $collapsed={collapsed}>
+                    <SidebarSectionTitle $collapsed={collapsed}>משפחה</SidebarSectionTitle>
+                    <FamilyRow $collapsed={collapsed}>
+                      {trip.family.map(m => (
+                        <Typography key={m.id} variant="body1" title={m.name} style={{ fontSize: 22, cursor: 'default' }}>
+                          {m.emoji}
+                        </Typography>
+                      ))}
+                    </FamilyRow>
+                  </SidebarSection>
+                )}
+              </SidebarContent>
+            </Sidebar>
+          ) : undefined
+        }
+      >
+        <Outlet />
+      </AppShell>
+
+      {isTablet && (
+        <Drawer
+          isOpen={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          placement="right"
+          size="sm"
+          title={
+            <Stack direction="row" spacing="sm" align="center">
               <span>{trip.coverEmoji}</span>
               <span>{trip.name}</span>
-            </TripTitle>
-            <Badge variant="info" size="sm">{trip.destination}</Badge>
-          </Stack>
-        </Navbar>
-      }
-      sidebar={
-        <Sidebar
-          position="right"
-          collapsible
-          collapsedWidth={60}
-          withBorder
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
+            </Stack>
+          }
         >
-          <SidebarContent>
-            <SidebarSection $collapsed={collapsed}>
-              <SidebarSectionTitle $collapsed={collapsed}>ניווט</SidebarSectionTitle>
-              {NavItems.map(item => (
-                <SidebarNavItem
-                  key={item.path}
-                  $active={currentPath === item.path}
-                  $collapsed={collapsed}
-                  onClick={() => navigate(`/trip/${id}/${item.path}`)}
-                  title={item.label}
-                >
-                  <NavIcon>{item.icon}</NavIcon>
-                  <NavLabel $collapsed={collapsed}>{item.label}</NavLabel>
-                </SidebarNavItem>
-              ))}
-            </SidebarSection>
-
-            {trip.family.length > 0 && (
-              <SidebarSection $collapsed={collapsed}>
-                <SidebarSectionTitle $collapsed={collapsed}>משפחה</SidebarSectionTitle>
-                <FamilyRow $collapsed={collapsed}>
-                  {trip.family.map(m => (
-                    <Typography key={m.id} variant="body1" title={m.name} style={{ fontSize: 22, cursor: 'default' }}>
-                      {m.emoji}
-                    </Typography>
-                  ))}
-                </FamilyRow>
-              </SidebarSection>
-            )}
-          </SidebarContent>
-        </Sidebar>
-      }
-    >
-      <Outlet />
-    </AppShell>
+          <DrawerNav>{sidebarContent}</DrawerNav>
+        </Drawer>
+      )}
+    </>
   )
 }

@@ -8,6 +8,7 @@ import { Plus, Upload } from 'lucide-react'
 import styled from 'styled-components'
 import { importTripFromFile } from '@/utils/export'
 import { generateId } from '@/utils/id'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 const Header = styled.div`
   padding: 32px 0 24px;
@@ -20,6 +21,7 @@ export default function Home() {
   const navigate = useNavigate()
   const trips = useTripStore(s => s.trips)
   const [showCreate, setShowCreate] = useState(false)
+  const { isMobile, isTablet } = useBreakpoint()
 
   const handleImport = async () => {
     try {
@@ -34,7 +36,7 @@ export default function Home() {
   }
 
   return (
-    <Container size="xl" style={{ padding: '0 24px' }}>
+    <Container size="xl" style={{ padding: `0 ${isMobile ? '12px' : '24px'}` }}>
       <Header>
         <Stack direction="column" spacing="xs">
           <Typography variant="h3" style={{ margin: 0 }}>✈️ הטיולים שלנו</Typography>
@@ -66,7 +68,7 @@ export default function Home() {
           onAction={() => setShowCreate(true)}
         />
       ) : (
-        <Grid columns={3} gap="md">
+        <Grid columns={isMobile ? 1 : isTablet ? 2 : 3} gap="md">
           {trips.map(trip => (
             <TripCard key={trip.id} trip={trip} />
           ))}

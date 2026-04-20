@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Stack, Typography, Button, Badge, ActionIcon, EmptyState } from 'myk-library'
+import { Stack, Typography, Button, Badge, ActionIcon, EmptyState, Box } from 'myk-library'
 import { DataTable } from 'myk-library'
 import type { ColumnDef } from 'myk-library'
 import { Plus, Pencil, Trash2, Users } from 'lucide-react'
 import styled from 'styled-components'
 import { useTripStore } from '@/stores/tripStore'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 import type { FamilyMember } from '@/types/family'
 import FamilyMemberFormModal from '@/components/family/FamilyMemberFormModal'
 
-const PageWrapper = styled.div`
-  padding: 24px;
+const PageWrapper = styled.div<{ $mobile: boolean }>`
+  padding: ${({ $mobile }) => ($mobile ? '12px' : '24px')};
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -24,6 +25,8 @@ export default function Family() {
 
   const [showAdd, setShowAdd] = useState(false)
   const [editMember, setEditMember] = useState<FamilyMember | undefined>()
+
+  const { isMobile } = useBreakpoint()
 
   const counts = useMemo(() => {
     const family = trip?.family ?? []
@@ -78,7 +81,7 @@ export default function Family() {
   if (!trip) return null
 
   return (
-    <PageWrapper>
+    <PageWrapper $mobile={isMobile}>
       <Stack direction="row" align="center" justify="between">
         <Stack direction="row" align="center" spacing="sm">
           <Typography variant="h5" style={{ margin: 0 }}>
@@ -108,13 +111,15 @@ export default function Family() {
           onAction={() => setShowAdd(true)}
         />
       ) : (
-        <DataTable
-          columns={columns}
-          data={trip.family}
-          variant="striped"
-          size="sm"
-          onRowClick={(m) => setEditMember(m)}
-        />
+        <Box style={{ overflowX: 'auto' }}>
+          <DataTable
+            columns={columns}
+            data={trip.family}
+            variant="striped"
+            size="sm"
+            onRowClick={(m) => setEditMember(m)}
+          />
+        </Box>
       )}
 
       <FamilyMemberFormModal open={showAdd} onClose={() => setShowAdd(false)} tripId={trip.id} />
