@@ -3,31 +3,15 @@ import { useParams } from 'react-router-dom'
 import { useTripStore } from '@/stores/tripStore'
 import DayColumn from '@/components/itinerary/DayColumn'
 import GmailSyncModal from '@/components/gmail/GmailSyncModal'
-import { Stack, Typography, Badge, Button } from 'myk-library'
+import { Stack, Typography, Badge, Button, Grid } from 'myk-library'
 import { getTripDuration } from '@/utils/date'
 import { formatDateShort } from '@/utils/date'
 import { Mail } from 'lucide-react'
 import styled from 'styled-components'
 
-const ScrollContainer = styled.div`
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 16px;
-  overflow-x: auto;
+const GridWrapper = styled.div`
   padding: 24px;
   min-height: calc(100vh - 120px);
-  align-items: flex-start;
-
-  &::-webkit-scrollbar {
-    height: 6px;
-  }
-  &::-webkit-scrollbar-track {
-    background: #f1f5f9;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-  }
 `
 
 const PageHeader = styled.div`
@@ -63,11 +47,13 @@ export default function Itinerary() {
       </PageHeader>
       {showGmail && <GmailSyncModal open={showGmail} onClose={() => setShowGmail(false)} tripId={trip.id} />}
 
-      <ScrollContainer>
-        {trip.days.map((day, index) => (
-          <DayColumn key={day.id} day={day} tripId={trip.id} dayIndex={index} />
-        ))}
-      </ScrollContainer>
+      <GridWrapper>
+        <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="md" autoFlow="row">
+          {trip.days.map((day, index) => (
+            <DayColumn key={day.id} day={day} tripId={trip.id} dayIndex={index} />
+          ))}
+        </Grid>
+      </GridWrapper>
     </div>
   )
 }

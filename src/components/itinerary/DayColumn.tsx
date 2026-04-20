@@ -25,9 +25,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 }
 
 const DayWrapper = styled.div`
-  min-width: 280px;
-  max-width: 320px;
-  flex-shrink: 0;
+  width: 100%;
 `
 
 interface Props {

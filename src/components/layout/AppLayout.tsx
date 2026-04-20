@@ -3,16 +3,16 @@ import { Outlet, useParams, Navigate, useLocation, useNavigate } from 'react-rou
 import {
   AppShell, Navbar, Sidebar,
   SidebarContent, SidebarNavItem, SidebarSection, SidebarSectionTitle,
-  Stack, Badge, Typography,
+  Stack, Badge, Typography, ActionIcon,
 } from 'myk-library'
 import { useTripStore } from '@/stores/tripStore'
 import styled from 'styled-components'
-import { Map, Wallet, Plane, Home } from 'lucide-react'
+import { Map, Wallet, Plane, Home, ListTodo, Users } from 'lucide-react'
 
 const TripTitle = styled.div`
   font-weight: 600;
   font-size: 16px;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.gray[900]};
   display: flex;
   align-items: center;
   gap: 8px;
@@ -38,6 +38,8 @@ const FamilyRow = styled.div<{ $collapsed: boolean }>`
 
 const NavItems = [
   { label: 'לוח זמנים', path: 'itinerary', icon: <Map size={18} /> },
+  { label: 'משפחה', path: 'family', icon: <Users size={18} /> },
+  { label: 'משימות', path: 'tasks', icon: <ListTodo size={18} /> },
   { label: 'תקציב', path: 'budget', icon: <Wallet size={18} /> },
   { label: 'טיסות ולינה', path: 'travel', icon: <Plane size={18} /> },
 ]
@@ -71,13 +73,15 @@ export default function AppLayout() {
       navbar={
         <Navbar height="sm">
           <Stack direction="row" align="center" spacing="md" style={{ padding: '0 16px', height: '100%' }}>
-            <button
+            <ActionIcon
               onClick={() => navigate('/')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}
               title="חזרה לרשימת טיולים"
+              aria-label="חזרה לרשימת טיולים"
+              variant="subtle"
+              size="sm"
             >
-              <Home size={20} />
-            </button>
+              <Home size={18} />
+            </ActionIcon>
             <TripTitle>
               <span>{trip.coverEmoji}</span>
               <span>{trip.name}</span>

@@ -34,11 +34,11 @@ function find(src: string, re: RegExp): string {
 
 const IATA_RE = /\b([A-Z]{3})\b/g
 const FLIGHT_NUM_RE = /\b(LY|FR|U2|W6|LH|IZ|TK|AY|BA)\s*(\d{1,4})\b/i
-const DATETIME_RE = /(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})[^\d]*(\d{2}:\d{2})/g
+const DATETIME_RE = /(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4})[^\d]*(\d{2}:\d{2})/g
 const PRICE_RE = /(?:ILS|₪|EUR|€|USD|\$)\s*([\d,]+)|(\d[\d,]+)\s*(?:ILS|₪|EUR|€|USD|\$)/
 
 function parseDateTime(raw: string): string {
-  const match = /(\d{1,2})[\/\-.:](\d{1,2})[\/\-.:](\d{2,4})[T\s]+(\d{2}:\d{2})/.exec(raw)
+  const match = /(\d{1,2})[-/.:](\d{1,2})[-/.:](\d{2,4})[T\s]+(\d{2}:\d{2})/.exec(raw)
   if (!match) return ''
   const [, d, m, y, t] = match
   const year = y.length === 2 ? `20${y}` : y
@@ -131,7 +131,7 @@ function parseAccommodationFromText(txt: string, subject: string): Omit<Accommod
 // ── Event Parser ─────────────────────────────────────────────────────────────
 
 function parseEventFromText(txt: string, subject: string): Omit<TripEvent, 'id' | 'dayId'> | null {
-  const dateMatch = /(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})/g.exec(txt)
+  const dateMatch = /(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4})/g.exec(txt)
   const timeMatch = /(\d{2}:\d{2})/.exec(txt)
   if (!dateMatch) return null
 
