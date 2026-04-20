@@ -6,6 +6,7 @@ import { GlobalStyles } from 'myk-library'
 import { tripTheme } from './theme/tripTheme'
 import App from './App'
 import './index.css'
+import 'leaflet/dist/leaflet.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

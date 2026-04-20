@@ -5,8 +5,10 @@ import { useTripStore } from '@/stores/tripStore'
 import { formatDateHe } from '@/utils/date'
 import type { TripDay, TripEvent } from '@/types/trip'
 import EventFormModal from './EventFormModal'
+import WeatherBadge from './WeatherBadge'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import styled from 'styled-components'
+import type { DayWeather } from '@/services/weatherService'
 
 const CATEGORY_COLORS: Record<string, string> = {
   activity: '#f59e0b',
@@ -32,9 +34,10 @@ interface Props {
   day: TripDay
   tripId: string
   dayIndex: number
+  weather?: DayWeather
 }
 
-export default function DayColumn({ day, tripId, dayIndex }: Props) {
+export default function DayColumn({ day, tripId, dayIndex, weather }: Props) {
   const removeEvent = useTripStore(s => s.removeEvent)
   const [showAdd, setShowAdd] = useState(false)
   const [editEvent, setEditEvent] = useState<TripEvent | undefined>()
@@ -76,6 +79,7 @@ export default function DayColumn({ day, tripId, dayIndex }: Props) {
           <Stack direction="column" spacing="xs">
             <Typography variant="body2" style={{ color: '#6b7280', fontSize: 12, fontWeight: 600 }}>יום {dayIndex + 1}</Typography>
             <Typography variant="body1" style={{ fontWeight: 600 }}>{formatDateHe(day.date)}</Typography>
+            {weather && <WeatherBadge data={weather} />}
           </Stack>
 
           {timelineItems.length > 0 ? (

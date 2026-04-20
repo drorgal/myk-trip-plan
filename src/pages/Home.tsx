@@ -78,7 +78,7 @@ export default function Home() {
       <TripFormModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
-        onCreated={id => navigate(`/trip/${id}/itinerary`)}
+        onCreated={id => navigate(`/trip/${id}/dashboard`)}
       />
     </Container>
   )

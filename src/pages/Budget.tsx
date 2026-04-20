@@ -98,18 +98,19 @@ export default function Budget() {
           value={formatCurrency(totalBudget, currency)}
           icon={<Wallet size={20} />}
           description={editBudget ? '' : 'עדכן תקציב'}
+          color="#f59e0b"
           onClick={!editBudget ? () => { setNewTotal(totalBudget); setNewCurrency(currency); setEditBudget(true) } : undefined}
         />
         <StatCard
           title="הוצאות בפועל"
           value={formatCurrency(totalSpent, currency)}
-          color={overBudget ? 'error' : undefined}
+          color={overBudget ? '#ef4444' : '#f59e0b'}
           trend={totalBudget > 0 ? { value: Math.round((totalSpent / totalBudget) * 100) - 100, label: 'מהתקציב' } : undefined}
         />
         <StatCard
           title="יתרה"
           value={formatCurrency(Math.abs(remaining), currency)}
-          color={remaining < 0 ? 'error' : 'success'}
+          color={remaining < 0 ? '#ef4444' : '#10b981'}
           description={remaining < 0 ? 'חריגה מהתקציב' : 'נותר לשימוש'}
         />
       </Grid>

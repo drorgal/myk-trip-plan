@@ -6,6 +6,8 @@ import type { BudgetItem } from '@/types/budget'
 import type { Flight, Accommodation } from '@/types/accommodation'
 import type { FamilyMember } from '@/types/family'
 import type { TripTask } from '@/types/task'
+import type { PackingItem } from '@/types/packing'
+import type { TripCoords } from '@/types/trip-plan'
 import { generateId } from '@/utils/id'
 import { getDaysBetween } from '@/utils/date'
 import { DEMO_TRIP } from '@/data/demoData'
@@ -44,6 +46,14 @@ interface TripStore {
   updateTask: (tripId: string, taskId: string, patch: Partial<Omit<TripTask, 'id' | 'createdAt'>>) => void
   toggleTask: (tripId: string, taskId: string) => void
   removeTask: (tripId: string, taskId: string) => void
+
+  setCoords: (tripId: string, coords: TripCoords) => void
+
+  addPackingItem: (tripId: string, item: Omit<PackingItem, 'id'>) => void
+  updatePackingItem: (tripId: string, itemId: string, patch: Partial<Omit<PackingItem, 'id'>>) => void
+  togglePackingItem: (tripId: string, itemId: string) => void
+  removePackingItem: (tripId: string, itemId: string) => void
+  addDefaultPackingItems: (tripId: string, items: Omit<PackingItem, 'id'>[]) => void
 }
 
 const buildDays = (startDate: string, endDate: string, existing: TripDay[] = []): TripDay[] => {
@@ -80,6 +90,7 @@ export const useTripStore = create<TripStore>()(
           budget: { currency: 'ILS', totalBudget: 0, items: [] },
           accommodations: [],
           flights: [],
+          packingItems: [],
           createdAt: now,
           updatedAt: now,
         }
@@ -316,6 +327,54 @@ export const useTripStore = create<TripStore>()(
             tasks: (t.tasks ?? []).filter(task => task.id !== taskId),
           })),
         })),
+
+      setCoords: (tripId, coords) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => ({ ...t, coords })),
+        })),
+
+      addPackingItem: (tripId, item) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            packingItems: [...(t.packingItems ?? []), { ...item, id: generateId() }],
+          })),
+        })),
+
+      updatePackingItem: (tripId, itemId, patch) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            packingItems: (t.packingItems ?? []).map(i => (i.id === itemId ? { ...i, ...patch } : i)),
+          })),
+        })),
+
+      togglePackingItem: (tripId, itemId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            packingItems: (t.packingItems ?? []).map(i => (i.id === itemId ? { ...i, packed: !i.packed } : i)),
+          })),
+        })),
+
+      removePackingItem: (tripId, itemId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            packingItems: (t.packingItems ?? []).filter(i => i.id !== itemId),
+          })),
+        })),
+
+      addDefaultPackingItems: (tripId, items) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            packingItems: [
+              ...(t.packingItems ?? []),
+              ...items.map(item => ({ ...item, id: generateId() })),
+            ],
+          })),
+        })),
     }),
     {
       name: 'myk-trip-plan-store',
@@ -332,6 +391,7 @@ export const useTripStore = create<TripStore>()(
         state.trips = state.trips.map(t => ({
           ...t,
           tasks: t.tasks ?? [],
+          packingItems: t.packingItems ?? [],
         }))
       },
     }

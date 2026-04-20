@@ -34,7 +34,7 @@ export default function TripCard({ trip }: Props) {
       variant="elevated"
       hoverable
       padding="md"
-      onClick={() => navigate(`/trip/${trip.id}/itinerary`)}
+      onClick={() => navigate(`/trip/${trip.id}/dashboard`)}
       style={{ cursor: 'pointer', position: 'relative' }}
     >
       <div style={{ position: 'absolute', top: 12, left: 12 }}>

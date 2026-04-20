@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTripStore } from '@/stores/tripStore'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { useWeather } from '@/hooks/useWeather'
 import DayColumn from '@/components/itinerary/DayColumn'
 import GmailSyncModal from '@/components/gmail/GmailSyncModal'
 import { Stack, Typography, Badge, Button, Grid } from 'myk-library'
@@ -25,6 +26,7 @@ export default function Itinerary() {
   const [showGmail, setShowGmail] = useState(false)
 
   const { isMobile } = useBreakpoint()
+  const { weather } = useWeather(id ?? '')
 
   if (!trip) return null
 
@@ -53,7 +55,7 @@ export default function Itinerary() {
       <GridWrapper $mobile={isMobile}>
         <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="md" autoFlow="row">
           {trip.days.map((day, index) => (
-            <DayColumn key={day.id} day={day} tripId={trip.id} dayIndex={index} />
+            <DayColumn key={day.id} day={day} tripId={trip.id} dayIndex={index} weather={weather[day.date]} />
           ))}
         </Grid>
       </GridWrapper>

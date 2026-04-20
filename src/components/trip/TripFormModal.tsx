@@ -67,6 +67,7 @@ export default function TripFormModal({ open, onClose, onCreated }: Props) {
       endDate,
       coverEmoji,
       family: members,
+      packingItems: [],
     })
     if (totalBudget > 0 || currency !== 'ILS') {
       setBudget(trip.id, totalBudget, currency)
