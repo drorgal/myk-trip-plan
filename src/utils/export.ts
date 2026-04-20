@@ -22,8 +22,18 @@ export function importTripFromFile(): Promise<TripPlan> {
       const reader = new FileReader()
       reader.onload = (e) => {
         try {
-          const trip = JSON.parse(e.target?.result as string) as TripPlan
-          if (!trip.id || !trip.name || !trip.days) throw new Error('Invalid trip JSON')
+          const raw = JSON.parse(e.target?.result as string) as Partial<TripPlan>
+          if (!raw.id || !raw.name || !raw.days) throw new Error('Invalid trip JSON')
+
+          const trip: TripPlan = {
+            ...(raw as TripPlan),
+            family: Array.isArray(raw.family) ? raw.family : [],
+            tasks: Array.isArray((raw as TripPlan).tasks) ? (raw as TripPlan).tasks : [],
+            accommodations: Array.isArray(raw.accommodations) ? raw.accommodations : [],
+            flights: Array.isArray(raw.flights) ? raw.flights : [],
+            budget: raw.budget ?? { currency: 'ILS', totalBudget: 0, items: [] },
+          }
+
           resolve(trip)
         } catch (err) {
           reject(err)

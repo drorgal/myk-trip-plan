@@ -5,6 +5,7 @@ import type { TripEvent, TripDay } from '@/types/trip'
 import type { BudgetItem } from '@/types/budget'
 import type { Flight, Accommodation } from '@/types/accommodation'
 import type { FamilyMember } from '@/types/family'
+import type { TripTask } from '@/types/task'
 import { generateId } from '@/utils/id'
 import { getDaysBetween } from '@/utils/date'
 import { DEMO_TRIP } from '@/data/demoData'
@@ -14,7 +15,7 @@ interface TripStore {
   activeTripId: string | null
 
   setActiveTrip: (id: string | null) => void
-  createTrip: (data: Omit<TripPlan, 'id' | 'days' | 'budget' | 'accommodations' | 'flights' | 'createdAt' | 'updatedAt'>) => TripPlan
+  createTrip: (data: Omit<TripPlan, 'id' | 'tasks' | 'days' | 'budget' | 'accommodations' | 'flights' | 'createdAt' | 'updatedAt'>) => TripPlan
   updateTrip: (id: string, patch: Partial<TripPlan>) => void
   deleteTrip: (id: string) => void
 
@@ -36,7 +37,13 @@ interface TripStore {
   removeAccommodation: (tripId: string, accId: string) => void
 
   addFamilyMember: (tripId: string, member: Omit<FamilyMember, 'id'>) => void
+  updateFamilyMember: (tripId: string, memberId: string, patch: Partial<Omit<FamilyMember, 'id'>>) => void
   removeFamilyMember: (tripId: string, memberId: string) => void
+
+  addTask: (tripId: string, task: Omit<TripTask, 'id' | 'done' | 'completedAt' | 'createdAt' | 'updatedAt'>) => void
+  updateTask: (tripId: string, taskId: string, patch: Partial<Omit<TripTask, 'id' | 'createdAt'>>) => void
+  toggleTask: (tripId: string, taskId: string) => void
+  removeTask: (tripId: string, taskId: string) => void
 }
 
 const buildDays = (startDate: string, endDate: string, existing: TripDay[] = []): TripDay[] => {
@@ -68,6 +75,7 @@ export const useTripStore = create<TripStore>()(
         const trip: TripPlan = {
           id: generateId(),
           ...data,
+          tasks: [],
           days: buildDays(data.startDate, data.endDate),
           budget: { currency: 'ILS', totalBudget: 0, items: [] },
           accommodations: [],
@@ -224,11 +232,88 @@ export const useTripStore = create<TripStore>()(
           })),
         })),
 
+      updateFamilyMember: (tripId, memberId, patch) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            family: t.family.map(m => (m.id === memberId ? { ...m, ...patch } : m)),
+          })),
+        })),
+
       removeFamilyMember: (tripId, memberId) =>
         set(state => ({
           trips: updateTrip(state.trips, tripId, t => touch({
             ...t,
             family: t.family.filter(m => m.id !== memberId),
+            tasks: (t.tasks ?? []).map(task => (task.assignedTo === memberId ? { ...task, assignedTo: undefined } : task)),
+            budget: {
+              ...t.budget,
+              items: t.budget.items.map(item => (item.paidBy === memberId ? { ...item, paidBy: undefined } : item)),
+            },
+          })),
+        })),
+
+      addTask: (tripId, task) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const now = new Date().toISOString()
+            const newTask: TripTask = {
+              id: generateId(),
+              title: task.title,
+              description: task.description || undefined,
+              dueDate: task.dueDate || undefined,
+              assignedTo: task.assignedTo || undefined,
+              done: false,
+              createdAt: now,
+              updatedAt: now,
+            }
+            return touch({ ...t, tasks: [...(t.tasks ?? []), newTask] })
+          }),
+        })),
+
+      updateTask: (tripId, taskId, patch) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const now = new Date().toISOString()
+            const tasks = (t.tasks ?? []).map(task => {
+              if (task.id !== taskId) return task
+              const nextDone = patch.done ?? task.done
+              const completedAt = nextDone ? (patch.completedAt ?? task.completedAt ?? now) : undefined
+              return {
+                ...task,
+                ...patch,
+                done: nextDone,
+                completedAt,
+                updatedAt: now,
+              }
+            })
+            return touch({ ...t, tasks })
+          }),
+        })),
+
+      toggleTask: (tripId, taskId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const now = new Date().toISOString()
+            const tasks = (t.tasks ?? []).map(task => {
+              if (task.id !== taskId) return task
+              const nextDone = !task.done
+              return {
+                ...task,
+                done: nextDone,
+                completedAt: nextDone ? now : undefined,
+                updatedAt: now,
+              }
+            })
+            return touch({ ...t, tasks })
+          }),
+        })),
+
+      removeTask: (tripId, taskId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            tasks: (t.tasks ?? []).filter(task => task.id !== taskId),
           })),
         })),
     }),
@@ -236,10 +321,18 @@ export const useTripStore = create<TripStore>()(
       name: 'myk-trip-plan-store',
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
-        if (state && state.trips.length === 0) {
+        if (!state) return
+
+        if (state.trips.length === 0) {
           state.trips = [DEMO_TRIP]
           state.activeTripId = DEMO_TRIP.id
+          return
         }
+
+        state.trips = state.trips.map(t => ({
+          ...t,
+          tasks: t.tasks ?? [],
+        }))
       },
     }
   )
@@ -265,4 +358,3 @@ export const getBudgetByCategory = (trip: TripPlan) =>
     },
     {} as Record<string, { planned: number; actual: number }>
   )
-
