@@ -10,10 +10,45 @@ html, body, #root {
 }
 
 body {
+  background-color: #0c0e14 !important;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 88% 8%,  rgba(245,158,11,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 8%  92%,  rgba(217,119, 6,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%,  rgba(245,158,11,0.02) 0%, transparent 70%) !important;
+  color: #f0f6fc !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.038'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 [dir="rtl"] table {
   direction: rtl;
+}
+
+/* Fix hardcoded dark text on dark backgrounds */
+h1, h2, h3, h4, h5, h6 {
+  color: #f0f6fc !important;
+}
+
+p, span, div, label {
+  color: inherit;
+}
+
+/* Section titles that use gray[500] — readable in dark */
+[class*="SectionTitle"], [class*="section-title"] {
+  color: #8b949e !important;
 }
