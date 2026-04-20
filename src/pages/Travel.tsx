@@ -1,0 +1,202 @@
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { Tabs, Stack, Card, Badge, ActionIcon, Button, EmptyState, Typography, Chip } from 'myk-library'
+import type { TabItem } from 'myk-library'
+import { useTripStore } from '@/stores/tripStore'
+import { formatCurrency } from '@/utils/currency'
+import FlightFormModal from '@/components/travel/FlightFormModal'
+import AccommodationFormModal from '@/components/travel/AccommodationFormModal'
+import GmailSyncModal from '@/components/gmail/GmailSyncModal'
+import type { Flight, Accommodation } from '@/types/accommodation'
+import { Plus, Pencil, Trash2, Plane, Hotel, Mail } from 'lucide-react'
+import styled from 'styled-components'
+import { parseISO, format } from 'date-fns'
+import { he } from 'date-fns/locale'
+
+const PageWrapper = styled.div`
+  padding: 24px;
+`
+
+const formatDT = (dt: string) => {
+  try { return format(parseISO(dt), 'd MMM HH:mm', { locale: he }) } catch { return dt }
+}
+
+const formatDateOnly = (d: string) => {
+  try { return format(parseISO(d), 'd MMM yyyy', { locale: he }) } catch { return d }
+}
+
+const CABIN_LABEL: Record<string, string> = { economy: 'תיירות', business: 'עסקים', first: 'ראשונה' }
+const TYPE_LABEL: Record<string, string> = { hotel: '🏨 מלון', airbnb: '🏠 Airbnb', hostel: '🛏️ הוסטל', villa: '🏡 וילה', other: '🏢 אחר' }
+
+export default function Travel() {
+  const { id } = useParams<{ id: string }>()
+  const trip = useTripStore(s => s.trips.find(t => t.id === id))
+  const removeFlight = useTripStore(s => s.removeFlight)
+  const removeAccommodation = useTripStore(s => s.removeAccommodation)
+
+  const [showAddFlight, setShowAddFlight] = useState(false)
+  const [editFlight, setEditFlight] = useState<Flight | undefined>()
+  const [showAddAcc, setShowAddAcc] = useState(false)
+  const [editAcc, setEditAcc] = useState<Accommodation | undefined>()
+  const [showGmail, setShowGmail] = useState(false)
+
+  if (!trip) return null
+
+  const outbound = trip.flights.filter(f => f.direction === 'outbound')
+  const returnFlights = trip.flights.filter(f => f.direction === 'return')
+
+  const tabs: TabItem[] = [
+    {
+      key: 'flights',
+      label: 'טיסות',
+      children: (
+        <Stack direction="column" spacing="md" style={{ paddingTop: 16 }}>
+          <Stack direction="row" justify="between" align="center">
+            <Typography variant="h6" style={{ margin: 0 }}>✈️ טיסות ({trip.flights.length})</Typography>
+            <Button size="sm" variant="primary" onClick={() => setShowAddFlight(true)}>
+              <Stack direction="row" spacing="xs" align="center">
+                <Plus size={14} /><span>הוסף טיסה</span>
+              </Stack>
+            </Button>
+          </Stack>
+
+          {trip.flights.length === 0 ? (
+            <EmptyState title="אין טיסות" description="הוסף טיסות לטיול שלך" />
+          ) : (
+            <>
+              {outbound.length > 0 && (
+                <Stack direction="column" spacing="sm">
+                  <Typography variant="body2" style={{ fontWeight: 600 }}>🛫 טיסות יציאה</Typography>
+                  {outbound.map(f => <FlightCard key={f.id} flight={f} tripId={trip.id} onEdit={setEditFlight} onDelete={removeFlight} />)}
+                </Stack>
+              )}
+              {returnFlights.length > 0 && (
+                <Stack direction="column" spacing="sm">
+                  <Typography variant="body2" style={{ fontWeight: 600 }}>🛬 טיסות חזרה</Typography>
+                  {returnFlights.map(f => <FlightCard key={f.id} flight={f} tripId={trip.id} onEdit={setEditFlight} onDelete={removeFlight} />)}
+                </Stack>
+              )}
+            </>
+          )}
+        </Stack>
+      ),
+    },
+    {
+      key: 'accommodation',
+      label: 'לינה',
+      children: (
+        <Stack direction="column" spacing="md" style={{ paddingTop: 16 }}>
+          <Stack direction="row" justify="between" align="center">
+            <Typography variant="h6" style={{ margin: 0 }}>🏨 לינה ({trip.accommodations.length})</Typography>
+            <Button size="sm" variant="primary" onClick={() => setShowAddAcc(true)}>
+              <Stack direction="row" spacing="xs" align="center">
+                <Plus size={14} /><span>הוסף לינה</span>
+              </Stack>
+            </Button>
+          </Stack>
+
+          {trip.accommodations.length === 0 ? (
+            <EmptyState title="אין לינות" description="הוסף פרטי לינה לטיול שלך" />
+          ) : (
+            <Stack direction="column" spacing="md">
+              {trip.accommodations.map(acc => (
+                <AccCard key={acc.id} acc={acc} tripId={trip.id} onEdit={setEditAcc} onDelete={removeAccommodation} />
+              ))}
+            </Stack>
+          )}
+        </Stack>
+      ),
+    },
+  ]
+
+  return (
+    <PageWrapper>
+      <Stack direction="row" justify="end" style={{ marginBottom: 8 }}>
+        <Button size="sm" variant="ghost" onClick={() => setShowGmail(true)}>
+          <Stack direction="row" spacing="xs" align="center">
+            <Mail size={14} /><span>סנכרן מ-Gmail</span>
+          </Stack>
+        </Button>
+      </Stack>
+      <Tabs items={tabs} variant="enclosed" />
+
+      <FlightFormModal open={showAddFlight} onClose={() => setShowAddFlight(false)} tripId={trip.id} />
+      {editFlight && (
+        <FlightFormModal open={!!editFlight} onClose={() => setEditFlight(undefined)} tripId={trip.id} editFlight={editFlight} />
+      )}
+      <AccommodationFormModal open={showAddAcc} onClose={() => setShowAddAcc(false)} tripId={trip.id} />
+      {editAcc && (
+        <AccommodationFormModal open={!!editAcc} onClose={() => setEditAcc(undefined)} tripId={trip.id} editAcc={editAcc} />
+      )}
+      <GmailSyncModal open={showGmail} onClose={() => setShowGmail(false)} tripId={trip.id} />
+    </PageWrapper>
+  )
+}
+
+function FlightCard({ flight, tripId, onEdit, onDelete }: { flight: Flight; tripId: string; onEdit: (f: Flight) => void; onDelete: (tid: string, fid: string) => void }) {
+  return (
+    <Card variant="outlined" padding="md">
+      <Stack direction="row" justify="between" align="start">
+        <Stack direction="column" spacing="xs">
+          <Stack direction="row" spacing="sm" align="center">
+            <Plane size={16} />
+            <Typography variant="body1" style={{ fontWeight: 600 }}>{flight.airline} {flight.flightNumber}</Typography>
+            <Badge size="sm" variant="info">{CABIN_LABEL[flight.cabinClass]}</Badge>
+          </Stack>
+          <Stack direction="row" spacing="md">
+            <Typography variant="h6" style={{ margin: 0 }}>{flight.departureAirport}</Typography>
+            <span style={{ color: '#6b7280' }}>→</span>
+            <Typography variant="h6" style={{ margin: 0 }}>{flight.arrivalAirport}</Typography>
+          </Stack>
+          <Typography variant="body2" style={{ color: '#6b7280' }}>
+            {formatDT(flight.departureTime)} – {formatDT(flight.arrivalTime)}
+          </Typography>
+          <Stack direction="row" spacing="sm">
+            {flight.baggageIncluded && <Chip size="sm" variant="success">כבודה כלולה</Chip>}
+            {flight.confirmationNumber && <Chip size="sm">{flight.confirmationNumber}</Chip>}
+          </Stack>
+        </Stack>
+        <Stack direction="column" align="end" spacing="xs">
+          <Typography variant="h6" style={{ margin: 0, color: '#059669' }}>
+            {formatCurrency(flight.cost, flight.currency)}
+          </Typography>
+          <Stack direction="row" spacing="xs">
+            <ActionIcon size="sm" variant="subtle" onClick={() => onEdit(flight)}><Pencil size={12} /></ActionIcon>
+            <ActionIcon size="sm" variant="subtle" onClick={() => onDelete(tripId, flight.id)}><Trash2 size={12} /></ActionIcon>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Card>
+  )
+}
+
+function AccCard({ acc, tripId, onEdit, onDelete }: { acc: Accommodation; tripId: string; onEdit: (a: Accommodation) => void; onDelete: (tid: string, aid: string) => void }) {
+  return (
+    <Card variant="elevated" padding="md">
+      <Stack direction="row" justify="between" align="start">
+        <Stack direction="column" spacing="xs">
+          <Stack direction="row" spacing="sm" align="center">
+            <Hotel size={16} />
+            <Typography variant="body1" style={{ fontWeight: 600 }}>{acc.name}</Typography>
+            <Badge size="sm">{TYPE_LABEL[acc.type]}</Badge>
+          </Stack>
+          {acc.address && <Typography variant="body2" style={{ color: '#6b7280' }}>📍 {acc.address}</Typography>}
+          <Typography variant="body2">
+            ✅ {formatDateOnly(acc.checkIn)} – 🏁 {formatDateOnly(acc.checkOut)}
+          </Typography>
+          {acc.rating && <span>{'⭐'.repeat(acc.rating)}</span>}
+          {acc.confirmationNumber && <Chip size="sm">{acc.confirmationNumber}</Chip>}
+        </Stack>
+        <Stack direction="column" align="end" spacing="xs">
+          <Typography variant="h6" style={{ margin: 0, color: '#059669' }}>
+            {formatCurrency(acc.cost, acc.currency)}
+          </Typography>
+          <Stack direction="row" spacing="xs">
+            <ActionIcon size="sm" variant="subtle" onClick={() => onEdit(acc)}><Pencil size={12} /></ActionIcon>
+            <ActionIcon size="sm" variant="subtle" onClick={() => onDelete(tripId, acc.id)}><Trash2 size={12} /></ActionIcon>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Card>
+  )
+}

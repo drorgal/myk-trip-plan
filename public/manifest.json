@@ -1,0 +1,19 @@
+{
+  "name": "מסע משפחתי — Family Trip Planner",
+  "short_name": "מסע משפחתי",
+  "description": "תכנן את הטיול המשפחתי הבא שלך",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#f59e0b",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
