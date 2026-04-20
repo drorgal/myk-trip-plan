@@ -31,6 +31,7 @@ export const tripTheme = {
     white: '#1c2130',
   },
   shadows: {
+    ...defaultTheme.shadows,
     sm: '0 1px 3px rgba(0,0,0,0.4)',
     md: '0 4px 12px rgba(0,0,0,0.5)',
     lg: '0 10px 24px rgba(0,0,0,0.6)',
