@@ -94,7 +94,7 @@ function getHeader(headers: Array<{ name: string; value: string }>, name: string
 }
 
 export async function fetchTravelEmails(token: string): Promise<GmailMessage[]> {
-  const query = [
+  const query = ['from:elal-ticketing.com',
     'from:elal.co.il', 'from:israir.co.il', 'from:ryanair.com',
     'from:easyjet.com', 'from:wizzair.com', 'from:lufthansa.com',
     'from:booking.com', 'from:airbnb.com', 'from:hotels.com',
