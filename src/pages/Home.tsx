@@ -10,11 +10,13 @@ import { importTripFromFile } from '@/utils/export'
 import { generateId } from '@/utils/id'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
 
-const Header = styled.div`
+const Header = styled.div<{ $mobile: boolean }>`
   padding: 32px 0 24px;
   display: flex;
-  align-items: center;
+  align-items: ${({ $mobile }) => ($mobile ? 'flex-start' : 'center')};
   justify-content: space-between;
+  flex-direction: ${({ $mobile }) => ($mobile ? 'column' : 'row')};
+  gap: ${({ $mobile }) => ($mobile ? '12px' : '0')};
 `
 
 export default function Home() {
@@ -37,7 +39,7 @@ export default function Home() {
 
   return (
     <Container size="xl" style={{ padding: `0 ${isMobile ? '12px' : '24px'}` }}>
-      <Header>
+      <Header $mobile={isMobile}>
         <Stack direction="column" spacing="xs">
           <Typography variant="h3" style={{ margin: 0 }}>✈️ הטיולים שלנו</Typography>
           <Typography variant="body2" style={{ color: '#6b7280' }}>

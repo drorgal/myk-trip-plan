@@ -4,6 +4,7 @@ import { Stack, Typography, Badge } from 'myk-library'
 import styled, { keyframes } from 'styled-components'
 import { useTripStore } from '@/stores/tripStore'
 import { geocodeDestination } from '@/services/weatherService'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
 import L from 'leaflet'
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
@@ -28,8 +29,8 @@ const PageWrapper = styled.div`
   height: calc(100vh - 60px);
 `
 
-const MapHeader = styled.div`
-  padding: 12px 24px;
+const MapHeader = styled.div<{ $mobile: boolean }>`
+  padding: 12px ${({ $mobile }) => ($mobile ? '12px' : '24px')};
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[200]};
   flex-shrink: 0;
 `
@@ -73,6 +74,7 @@ export default function Map() {
   const trip = useTripStore(s => s.trips.find(t => t.id === id))
   const setCoords = useTripStore(s => s.setCoords)
 
+  const { isMobile } = useBreakpoint()
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -144,7 +146,7 @@ export default function Map() {
 
   return (
     <PageWrapper>
-      <MapHeader>
+      <MapHeader $mobile={isMobile}>
         <Stack direction="row" align="center" spacing="sm">
           <Typography variant="h5" style={{ margin: 0 }}>🗺️ מפה</Typography>
           <Badge variant="info" size="sm">{trip.destination}</Badge>

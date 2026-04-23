@@ -19,6 +19,17 @@ const GridWrapper = styled.div<{ $mobile: boolean }>`
 
 const PageHeader = styled.div<{ $mobile: boolean }>`
   padding: 20px ${({ $mobile }) => ($mobile ? '12px' : '24px')} 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`
+
+const PageHeaderRow = styled.div<{ $mobile: boolean }>`
+  display: flex;
+  align-items: ${({ $mobile }) => ($mobile ? 'flex-start' : 'center')};
+  justify-content: space-between;
+  flex-direction: ${({ $mobile }) => ($mobile ? 'column' : 'row')};
+  gap: ${({ $mobile }) => ($mobile ? '8px' : '0')};
 `
 
 export default function Itinerary() {
@@ -40,8 +51,8 @@ export default function Itinerary() {
   return (
     <div>
       <PageHeader $mobile={isMobile}>
-        <Stack direction="row" align="center" justify="between" spacing="md">
-          <Stack direction="row" align="center" spacing="md">
+        <PageHeaderRow $mobile={isMobile}>
+          <Stack direction="row" align="center" spacing="sm" style={{ flexWrap: 'wrap' }}>
             <Typography variant="h5" style={{ margin: 0 }}>📅 לוח זמנים</Typography>
             <Badge variant="default">{duration} ימים</Badge>
             <Typography variant="body2" style={{ color: '#6b7280' }}>
@@ -53,34 +64,34 @@ export default function Itinerary() {
               <Mail size={14} /><span>סנכרן מ-Gmail</span>
             </Stack>
           </Button>
-        </Stack>
+        </PageHeaderRow>
       </PageHeader>
       {showGmail && <GmailSyncModal open={showGmail} onClose={() => setShowGmail(false)} tripId={trip.id} />}
 
       {pastVisits.length > 0 && !hidePastVisit && (
-        <div style={{ margin: `12px ${isMobile ? '12px' : '24px'} 0`, background: '#eff6ff', border: '1.5px solid #3b82f6', borderRadius: 10, padding: '10px 14px' }}>
+        <div style={{ margin: `12px ${isMobile ? '12px' : '24px'} 0`, background: 'rgba(59,130,246,0.12)', border: '1.5px solid #3b82f6', borderRadius: 10, padding: '10px 14px' }}>
           <Stack direction="row" align="center" justify="between">
             <Stack direction="row" spacing="sm" align="center">
-              <History size={16} style={{ color: '#2563eb' }} />
-              <Typography variant="body2" style={{ fontWeight: 700, color: '#1e40af' }}>
+              <History size={16} style={{ color: '#60a5fa' }} />
+              <Typography variant="body2" style={{ fontWeight: 700, color: '#93c5fd' }}>
                 ביקרתם ב-{trip.destination} לפני כן!
               </Typography>
             </Stack>
-            <button onClick={() => setHidePastVisit(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93c5fd', fontSize: 18 }}>×</button>
+            <button onClick={() => setHidePastVisit(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#60a5fa', fontSize: 18 }}>×</button>
           </Stack>
           {pastVisits.slice(0, 2).map(v => (
             <div key={v.tripId} style={{ marginTop: 8 }}>
-              <Typography variant="body2" style={{ color: '#1e40af', fontSize: 12 }}>
+              <Typography variant="body2" style={{ color: '#93c5fd', fontSize: 12 }}>
                 {v.coverEmoji} <strong>{v.tripName}</strong> ({formatDateShort(v.startDate)} – {formatDateShort(v.endDate)})
                 {v.overallRating > 0 && ` · ${'⭐'.repeat(v.overallRating)}`}
               </Typography>
               {v.highlights.length > 0 && (
-                <Typography variant="body2" style={{ color: '#3b82f6', fontSize: 11, marginTop: 2 }}>
+                <Typography variant="body2" style={{ color: '#60a5fa', fontSize: 11, marginTop: 2 }}>
                   💡 {v.highlights.slice(0, 2).join(' · ')}
                 </Typography>
               )}
               {v.whatWentWell && (
-                <Typography variant="body2" style={{ color: '#3b82f6', fontSize: 11, marginTop: 2 }}>
+                <Typography variant="body2" style={{ color: '#60a5fa', fontSize: 11, marginTop: 2 }}>
                   ✓ {v.whatWentWell.substring(0, 80)}{v.whatWentWell.length > 80 ? '...' : ''}
                 </Typography>
               )}

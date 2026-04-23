@@ -100,7 +100,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function FamilyProfile() {
   const navigate = useNavigate()
   const archivedTrips = useArchiveStore(s => s.archivedTrips)
-  const { isMobile } = useBreakpoint()
+  const { isMobile, isTablet } = useBreakpoint()
   const profile = computeFamilyProfile(archivedTrips)
 
   return (
@@ -138,7 +138,7 @@ export default function FamilyProfile() {
             </DNACard>
 
             {/* Quick stats */}
-            <StatsGrid $cols={isMobile ? 2 : 4}>
+            <StatsGrid $cols={isMobile ? 2 : isTablet ? 2 : 4}>
               <StatBox>
                 <Typography variant="h4" style={{ margin: '0 0 4px', color: '#f59e0b' }}>{profile.totalTrips}</Typography>
                 <Typography variant="body2" style={{ color: '#6b7280', fontSize: 12 }}>טיולים</Typography>

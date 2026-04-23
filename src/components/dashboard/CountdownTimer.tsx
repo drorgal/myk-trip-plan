@@ -4,20 +4,21 @@ import { Typography } from 'myk-library'
 
 const Row = styled.div`
   display: flex;
-  gap: 16px;
+  gap: 8px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 `
 
 const Unit = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 64px;
+  flex: 1;
+  min-width: 0;
 `
 
 const Num = styled.div`
-  font-size: 40px;
+  font-size: clamp(28px, 8vw, 40px);
   font-weight: 700;
   line-height: 1;
   color: ${({ theme }) => theme.colors.primary[500]};

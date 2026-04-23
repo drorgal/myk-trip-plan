@@ -41,7 +41,7 @@ export default function Travel() {
   const [editAcc, setEditAcc] = useState<Accommodation | undefined>()
   const [showGmail, setShowGmail] = useState(false)
 
-  const { isMobile } = useBreakpoint()
+  const { isMobile, isTablet } = useBreakpoint()
 
   if (!trip) return null
 
@@ -70,13 +70,13 @@ export default function Travel() {
               {outbound.length > 0 && (
                 <Stack direction="column" spacing="sm">
                   <Typography variant="body2" style={{ fontWeight: 600 }}>🛫 טיסות יציאה</Typography>
-                  {outbound.map(f => <FlightCard key={f.id} flight={f} tripId={trip.id} onEdit={setEditFlight} onDelete={removeFlight} />)}
+                  {outbound.map(f => <FlightCard key={f.id} flight={f} tripId={trip.id} onEdit={setEditFlight} onDelete={removeFlight} isMobile={isMobile} />)}
                 </Stack>
               )}
               {returnFlights.length > 0 && (
                 <Stack direction="column" spacing="sm">
                   <Typography variant="body2" style={{ fontWeight: 600 }}>🛬 טיסות חזרה</Typography>
-                  {returnFlights.map(f => <FlightCard key={f.id} flight={f} tripId={trip.id} onEdit={setEditFlight} onDelete={removeFlight} />)}
+                  {returnFlights.map(f => <FlightCard key={f.id} flight={f} tripId={trip.id} onEdit={setEditFlight} onDelete={removeFlight} isMobile={isMobile} />)}
                 </Stack>
               )}
             </>
@@ -103,7 +103,7 @@ export default function Travel() {
           ) : (
             <Stack direction="column" spacing="md">
               {trip.accommodations.map(acc => (
-                <AccCard key={acc.id} acc={acc} tripId={trip.id} onEdit={setEditAcc} onDelete={removeAccommodation} />
+                <AccCard key={acc.id} acc={acc} tripId={trip.id} onEdit={setEditAcc} onDelete={removeAccommodation} isMobile={isMobile} />
               ))}
             </Stack>
           )}
@@ -136,10 +136,10 @@ export default function Travel() {
   )
 }
 
-function FlightCard({ flight, tripId, onEdit, onDelete }: { flight: Flight; tripId: string; onEdit: (f: Flight) => void; onDelete: (tid: string, fid: string) => void }) {
+function FlightCard({ flight, tripId, onEdit, onDelete, isMobile }: { flight: Flight; tripId: string; onEdit: (f: Flight) => void; onDelete: (tid: string, fid: string) => void; isMobile: boolean }) {
   return (
     <Card variant="outlined" padding="md">
-      <Stack direction="row" justify="between" align="start">
+      <Stack direction={isMobile ? 'column' : 'row'} justify="between" align="start" spacing={isMobile ? 'sm' : undefined}>
         <Stack direction="column" spacing="xs">
           <Stack direction="row" spacing="sm" align="center">
             <Plane size={16} />
@@ -159,7 +159,7 @@ function FlightCard({ flight, tripId, onEdit, onDelete }: { flight: Flight; trip
             {flight.confirmationNumber && <Chip size="sm">{flight.confirmationNumber}</Chip>}
           </Stack>
         </Stack>
-        <Stack direction="column" align="end" spacing="xs">
+        <Stack direction={isMobile ? 'row' : 'column'} align={isMobile ? 'center' : 'end'} justify={isMobile ? 'between' : undefined} spacing="xs" style={isMobile ? { width: '100%' } : undefined}>
           <Typography variant="h6" style={{ margin: 0, color: '#059669' }}>
             {formatCurrency(flight.cost, flight.currency)}
           </Typography>
@@ -173,10 +173,10 @@ function FlightCard({ flight, tripId, onEdit, onDelete }: { flight: Flight; trip
   )
 }
 
-function AccCard({ acc, tripId, onEdit, onDelete }: { acc: Accommodation; tripId: string; onEdit: (a: Accommodation) => void; onDelete: (tid: string, aid: string) => void }) {
+function AccCard({ acc, tripId, onEdit, onDelete, isMobile }: { acc: Accommodation; tripId: string; onEdit: (a: Accommodation) => void; onDelete: (tid: string, aid: string) => void; isMobile: boolean }) {
   return (
     <Card variant="elevated" padding="md">
-      <Stack direction="row" justify="between" align="start">
+      <Stack direction={isMobile ? 'column' : 'row'} justify="between" align="start" spacing={isMobile ? 'sm' : undefined}>
         <Stack direction="column" spacing="xs">
           <Stack direction="row" spacing="sm" align="center">
             <Hotel size={16} />
@@ -190,7 +190,7 @@ function AccCard({ acc, tripId, onEdit, onDelete }: { acc: Accommodation; tripId
           {acc.rating && <span>{'⭐'.repeat(acc.rating)}</span>}
           {acc.confirmationNumber && <Chip size="sm">{acc.confirmationNumber}</Chip>}
         </Stack>
-        <Stack direction="column" align="end" spacing="xs">
+        <Stack direction={isMobile ? 'row' : 'column'} align={isMobile ? 'center' : 'end'} justify={isMobile ? 'between' : undefined} spacing="xs" style={isMobile ? { width: '100%' } : undefined}>
           <Typography variant="h6" style={{ margin: 0, color: '#059669' }}>
             {formatCurrency(acc.cost, acc.currency)}
           </Typography>

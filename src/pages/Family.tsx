@@ -82,8 +82,8 @@ export default function Family() {
 
   return (
     <PageWrapper $mobile={isMobile}>
-      <Stack direction="row" align="center" justify="between">
-        <Stack direction="row" align="center" spacing="sm">
+      <Stack direction={isMobile ? 'column' : 'row'} align={isMobile ? 'stretch' : 'center'} justify="between" spacing="sm">
+        <Stack direction="row" align="center" spacing="sm" style={{ flexWrap: 'wrap' }}>
           <Typography variant="h5" style={{ margin: 0 }}>
             <Stack direction="row" spacing="xs" align="center">
               <Users size={18} />
@@ -95,7 +95,7 @@ export default function Family() {
           {counts.children > 0 && <Badge variant="warning" size="sm">{counts.children} ילדים</Badge>}
         </Stack>
 
-        <Button variant="primary" size="sm" onClick={() => setShowAdd(true)}>
+        <Button variant="primary" size="sm" onClick={() => setShowAdd(true)} style={{ whiteSpace: 'nowrap', alignSelf: isMobile ? 'flex-end' : undefined }}>
           <Stack direction="row" spacing="xs" align="center">
             <Plus size={14} />
             <span>הוסף בן/בת משפחה</span>

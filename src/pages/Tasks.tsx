@@ -189,8 +189,8 @@ export default function Tasks() {
 
   return (
     <PageWrapper $mobile={isMobile}>
-      <Stack direction="row" align="center" justify="between" spacing="md">
-        <Stack direction="row" align="center" spacing="sm">
+      <Stack direction={isMobile ? 'column' : 'row'} align={isMobile ? 'stretch' : 'center'} justify="between" spacing="sm">
+        <Stack direction="row" align="center" spacing="sm" style={{ flexWrap: 'wrap' }}>
           <Typography variant="h5" style={{ margin: 0 }}>
             <Stack direction="row" spacing="xs" align="center">
               <ListTodo size={18} />
@@ -202,7 +202,7 @@ export default function Tasks() {
           {overdueCount > 0 && <Badge variant="error" size="sm">{overdueCount} באיחור</Badge>}
         </Stack>
 
-        <Button variant="primary" size="sm" onClick={() => setShowAdd(true)}>
+        <Button variant="primary" size="sm" onClick={() => setShowAdd(true)} style={{ whiteSpace: 'nowrap', alignSelf: isMobile ? 'flex-end' : undefined }}>
           <Stack direction="row" spacing="xs" align="center">
             <Plus size={14} />
             <span>הוסף משימה</span>

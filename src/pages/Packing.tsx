@@ -135,8 +135,8 @@ export default function Packing() {
 
   return (
     <PageWrapper $mobile={isMobile}>
-      <Stack direction="row" align="center" justify="between" spacing="md">
-        <Stack direction="row" align="center" spacing="sm">
+      <Stack direction={isMobile ? 'column' : 'row'} align={isMobile ? 'stretch' : 'center'} justify="between" spacing="sm">
+        <Stack direction="row" align="center" spacing="sm" style={{ flexWrap: 'wrap' }}>
           <Typography variant="h5" style={{ margin: 0 }}>
             <Stack direction="row" spacing="xs" align="center">
               <Backpack size={18} />
@@ -150,13 +150,13 @@ export default function Packing() {
           )}
         </Stack>
 
-        <Stack direction="row" spacing="sm">
+        <Stack direction="row" spacing="sm" justify={isMobile ? 'end' : undefined}>
           {items.length === 0 && (
-            <Button variant="ghost" size="sm" onClick={handleAddDefaults}>
+            <Button variant="ghost" size="sm" onClick={handleAddDefaults} style={{ whiteSpace: 'nowrap' }}>
               הוסף סט בסיסי
             </Button>
           )}
-          <Button variant="primary" size="sm" onClick={() => setShowAdd(true)}>
+          <Button variant="primary" size="sm" onClick={() => setShowAdd(true)} style={{ whiteSpace: 'nowrap' }}>
             <Stack direction="row" spacing="xs" align="center">
               <Plus size={14} />
               <span>הוסף פריט</span>

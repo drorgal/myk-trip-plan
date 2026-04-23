@@ -78,7 +78,7 @@ export default function Budget() {
     <PageWrapper $mobile={isMobile}>
       <Stack direction="row" align="center" justify="between">
         <Typography variant="h5" style={{ margin: 0 }}>💰 תקציב</Typography>
-        <Button variant="primary" size="sm" onClick={() => setShowAdd(true)}>
+        <Button variant="primary" size="sm" onClick={() => setShowAdd(true)} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
           <Stack direction="row" spacing="xs" align="center">
             <Plus size={14} />
             <span>הוסף הוצאה</span>
