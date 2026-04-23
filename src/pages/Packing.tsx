@@ -9,6 +9,8 @@ import type { ColumnDef } from 'myk-library'
 import { Plus, Pencil, Trash2, Backpack } from 'lucide-react'
 import styled from 'styled-components'
 import { useTripStore } from '@/stores/tripStore'
+import { useArchiveStore } from '@/stores/archiveStore'
+import { computeFamilyProfile } from '@/utils/profileCalculator'
 import type { PackingItem, PackingCategory } from '@/types/packing'
 import { PACKING_CATEGORY_LABEL, DEFAULT_PACKING_ITEMS } from '@/types/packing'
 import PackingFormModal from '@/components/packing/PackingFormModal'
@@ -40,6 +42,8 @@ export default function Packing() {
   const [categoryFilter, setCategoryFilter] = useState<PackingCategory | ''>('')
   const [packedFilter, setPackedFilter] = useState<'all' | 'packed' | 'unpacked'>('all')
 
+  const archivedTrips = useArchiveStore(s => s.archivedTrips)
+  const profile = useMemo(() => computeFamilyProfile(archivedTrips), [archivedTrips])
   const items = trip?.packingItems ?? []
 
   const { filtered, packedCount, totalCount } = useMemo(() => {
@@ -170,6 +174,73 @@ export default function Packing() {
           <Typography variant="body2" style={{ opacity: 0.6 }}>{packedCount}/{totalCount}</Typography>
         </ProgressRow>
       )}
+
+      {profile && (profile.alwaysPackItems.length > 0 || profile.neverPackItems.length > 0) && (() => {
+        const existingTitles = new Set(items.map(i => i.title.toLowerCase()))
+        const toAdd = profile.alwaysPackItems.filter(t => !existingTitles.has(t.toLowerCase()))
+        return (
+          <div style={{ background: '#fef3c7', border: '1.5px solid #f59e0b', borderRadius: 10, padding: '12px 14px' }}>
+            <Stack direction="row" spacing="sm" align="center" style={{ marginBottom: 8 }}>
+              <span>🧠</span>
+              <Typography variant="body2" style={{ fontWeight: 700, color: '#92400e' }}>חכמות מניסיון שלנו</Typography>
+            </Stack>
+            {profile.alwaysPackItems.length > 0 && (
+              <Stack direction="column" spacing="xs" style={{ marginBottom: 8 }}>
+                <Typography variant="body2" style={{ fontSize: 12, color: '#78350f' }}>⭐ תמיד שימש בטיולים קודמים:</Typography>
+                <Stack direction="row" spacing="xs" style={{ flexWrap: 'wrap' }}>
+                  {profile.alwaysPackItems.map(t => {
+                    const already = existingTitles.has(t.toLowerCase())
+                    return (
+                      <span key={t} style={{
+                        background: already ? '#d1fae5' : '#fff',
+                        border: `1.5px solid ${already ? '#10b981' : '#f59e0b'}`,
+                        borderRadius: 14,
+                        padding: '2px 10px',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: already ? '#065f46' : '#92400e',
+                      }}>
+                        {already ? '✓ ' : ''}{t}
+                      </span>
+                    )
+                  })}
+                </Stack>
+              </Stack>
+            )}
+            {toAdd.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (!id) return
+                  addDefaultPackingItems(id, toAdd.map(title => ({ title, category: 'other' as const, packed: false })))
+                }}
+                style={{ fontSize: 12, padding: '4px 10px', color: '#92400e', border: '1px solid #d97706' }}
+              >
+                הוסף {toAdd.length} פריטים חכמים לרשימה
+              </Button>
+            )}
+            {profile.neverPackItems.length > 0 && (
+              <Stack direction="row" spacing="xs" style={{ flexWrap: 'wrap', marginTop: 6 }}>
+                <Typography variant="body2" style={{ fontSize: 12, color: '#78350f', width: '100%' }}>🚫 לרוב לא שימש:</Typography>
+                {profile.neverPackItems.map(t => (
+                  <span key={t} style={{
+                    background: '#fee2e2',
+                    border: '1.5px solid #ef4444',
+                    borderRadius: 14,
+                    padding: '2px 10px',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#991b1b',
+                  }}>
+                    {t}
+                  </span>
+                ))}
+              </Stack>
+            )}
+          </div>
+        )
+      })()}
 
       <Stack direction={isMobile ? 'column' : 'row'} spacing="md" align={isMobile ? 'stretch' : 'end'}>
         <Select

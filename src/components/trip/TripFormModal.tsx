@@ -5,9 +5,11 @@ import {
 } from 'myk-library'
 import type { Step } from 'myk-library'
 import { useTripStore } from '@/stores/tripStore'
+import { useArchiveStore } from '@/stores/archiveStore'
+import { predictBudget } from '@/utils/profileCalculator'
 import { CURRENCY_OPTIONS } from '@/utils/currency'
-import { formatDateISO } from '@/utils/date'
-import { Plus, Trash2 } from 'lucide-react'
+import { formatDateISO, getTripDuration } from '@/utils/date'
+import { Plus, Trash2, Lightbulb } from 'lucide-react'
 import type { FamilyMember } from '@/types/family'
 import { generateId } from '@/utils/id'
 
@@ -23,6 +25,7 @@ const MEMBER_EMOJIS = ['👨', '👩', '👦', '👧', '🧒', '👴', '👵']
 export default function TripFormModal({ open, onClose, onCreated }: Props) {
   const createTrip = useTripStore(s => s.createTrip)
   const setBudget = useTripStore(s => s.setBudget)
+  const archivedTrips = useArchiveStore(s => s.archivedTrips)
   const today = formatDateISO(new Date())
 
   const [step, setStep] = useState(0)
@@ -135,24 +138,56 @@ export default function TripFormModal({ open, onClose, onCreated }: Props) {
           </Stack>
         )}
 
-        {step === 1 && (
-          <Stack direction="column" spacing="md">
-            <Select
-              label="מטבע"
-              value={currency}
-              onChange={e => setCurrency(e.target.value)}
-            >
-              {CURRENCY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </Select>
-            <NumberInput
-              label="תקציב כולל"
-              value={totalBudget}
-              onChange={val => setTotalBudget(val ?? 0)}
-              min={0}
-              step={100}
-            />
-          </Stack>
-        )}
+        {step === 1 && (() => {
+          const days = startDate && endDate ? getTripDuration(startDate, endDate) : 1
+          const familyCount = members.length || 2
+          const prediction = predictBudget(archivedTrips, days, familyCount)
+          return (
+            <Stack direction="column" spacing="md">
+              {prediction && (
+                <div style={{
+                  background: '#fef3c7',
+                  border: '1.5px solid #f59e0b',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                }}>
+                  <Stack direction="row" spacing="sm" align="center" style={{ marginBottom: 6 }}>
+                    <Lightbulb size={16} style={{ color: '#d97706' }} />
+                    <Typography variant="body2" style={{ fontWeight: 700, color: '#92400e' }}>
+                      תחזית מניסיון ({prediction.basedOnTrips} טיול{prediction.basedOnTrips > 1 ? 'ים' : ''})
+                    </Typography>
+                    <Badge variant="warning" size="sm">ביטחון {prediction.confidence === 'high' ? 'גבוה' : prediction.confidence === 'medium' ? 'בינוני' : 'נמוך'}</Badge>
+                  </Stack>
+                  <Typography variant="body2" style={{ color: '#78350f', marginBottom: 8 }}>
+                    {days} ימים × {familyCount} נוסעים × {prediction.avgDailyPerPerson}₪ ≈ <strong>{prediction.suggested.toLocaleString('he-IL')} ₪</strong>
+                  </Typography>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTotalBudget(prediction.suggested)}
+                    style={{ fontSize: 12, padding: '4px 10px', color: '#92400e', border: '1px solid #d97706' }}
+                  >
+                    השתמש בתחזית
+                  </Button>
+                </div>
+              )}
+              <Select
+                label="מטבע"
+                value={currency}
+                onChange={e => setCurrency(e.target.value)}
+              >
+                {CURRENCY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </Select>
+              <NumberInput
+                label="תקציב כולל"
+                value={totalBudget}
+                onChange={val => setTotalBudget(val ?? 0)}
+                min={0}
+                step={100}
+              />
+            </Stack>
+          )
+        })()}
 
         {step === 2 && (
           <Stack direction="column" spacing="md">

@@ -8,12 +8,14 @@ import Travel from './pages/Travel'
 import Tasks from './pages/Tasks'
 import Packing from './pages/Packing'
 import Map from './pages/Map'
+import FamilyProfile from './pages/FamilyProfile'
 import AppLayout from './components/layout/AppLayout'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/profile" element={<FamilyProfile />} />
       <Route path="/trip/:id" element={<AppLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />

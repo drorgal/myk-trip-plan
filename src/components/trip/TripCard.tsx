@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { Card, Badge, Stack, Chip, ActionIcon, Typography } from 'myk-library'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, Calendar, Download } from 'lucide-react'
+import { Trash2, Calendar, Download, Archive } from 'lucide-react'
 import { useTripStore } from '@/stores/tripStore'
 import { formatDateShort, getTripDuration } from '@/utils/date'
 import styled from 'styled-components'
 import type { TripPlan } from '@/types/trip-plan'
 import { exportTripAsJSON } from '@/utils/export'
+import PostTripDebriefModal from '@/components/archive/PostTripDebriefModal'
+import { useArchiveStore } from '@/stores/archiveStore'
 
 const Emoji = styled.div`
   font-size: 48px;
@@ -20,7 +23,10 @@ interface Props {
 export default function TripCard({ trip }: Props) {
   const navigate = useNavigate()
   const deleteTrip = useTripStore(s => s.deleteTrip)
+  const archivedTrips = useArchiveStore(s => s.archivedTrips)
   const duration = getTripDuration(trip.startDate, trip.endDate)
+  const [showDebrief, setShowDebrief] = useState(false)
+  const isArchived = archivedTrips.some(a => a.id === trip.id)
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -30,6 +36,7 @@ export default function TripCard({ trip }: Props) {
   }
 
   return (
+    <>
     <Card
       variant="elevated"
       hoverable
@@ -39,6 +46,15 @@ export default function TripCard({ trip }: Props) {
     >
       <div style={{ position: 'absolute', top: 12, left: 12 }}>
         <Stack direction="row" spacing="xs">
+          <ActionIcon
+            variant="subtle"
+            size="sm"
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); setShowDebrief(true) }}
+            title={isArchived ? 'ערוך זיכרונות' : 'סיים טיול ושמור זיכרונות'}
+            style={isArchived ? { color: '#f59e0b' } : undefined}
+          >
+            <Archive size={14} />
+          </ActionIcon>
           <ActionIcon variant="subtle" size="sm" onClick={(e: React.MouseEvent) => { e.stopPropagation(); exportTripAsJSON(trip) }} title="ייצא כ-JSON">
             <Download size={14} />
           </ActionIcon>
@@ -64,7 +80,19 @@ export default function TripCard({ trip }: Props) {
             {trip.family.map(m => m.emoji).join(' ')} {trip.family.length} נוסעים
           </Typography>
         )}
+        {isArchived && (
+          <Badge variant="success" size="sm">✓ נשמר בזיכרון</Badge>
+        )}
       </Stack>
     </Card>
+
+    {showDebrief && (
+      <PostTripDebriefModal
+        open={showDebrief}
+        onClose={() => setShowDebrief(false)}
+        trip={trip}
+      />
+    )}
+    </>
   )
 }
