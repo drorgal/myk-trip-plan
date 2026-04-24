@@ -1,8 +1,8 @@
 import type { GmailMessage } from './gmail'
-import type { Flight, Accommodation } from '@/types/accommodation'
+import type { Flight, Accommodation, CarRental } from '@/types/accommodation'
 import type { TripEvent } from '@/types/trip'
 
-export type ParsedEmailType = 'flight' | 'accommodation' | 'event' | 'unknown'
+export type ParsedEmailType = 'flight' | 'accommodation' | 'car-rental' | 'event' | 'unknown'
 
 export interface ParsedEmail {
   messageId: string
@@ -12,6 +12,7 @@ export interface ParsedEmail {
   date: string
   flight?: Omit<Flight, 'id'>
   accommodation?: Omit<Accommodation, 'id'>
+  carRental?: Omit<CarRental, 'id'>
   event?: Omit<TripEvent, 'id' | 'dayId'>
 }
 
@@ -190,6 +191,99 @@ function parseAccommodationFromText(txt: string, subject: string): Omit<Accommod
   }
 }
 
+// ── Car Rental Parser ─────────────────────────────────────────────────────────
+
+function resolveCarCompany(from: string): string {
+  const f = from.toLowerCase()
+  if (f.includes('hertz')) return 'Hertz'
+  if (f.includes('avis')) return 'Avis'
+  if (f.includes('budget')) return 'Budget'
+  if (f.includes('europcar')) return 'Europcar'
+  if (f.includes('sixt') || f.includes('shlomo')) return 'Sixt'
+  if (f.includes('alamo')) return 'Alamo'
+  if (f.includes('enterprise')) return 'Enterprise'
+  if (f.includes('nationalcar') || f.includes('national')) return 'National'
+  if (f.includes('dollar')) return 'Dollar'
+  if (f.includes('thrifty')) return 'Thrifty'
+  if (f.includes('rentalcars')) return 'Rentalcars.com'
+  if (f.includes('autoeurope')) return 'Auto Europe'
+  if (f.includes('discovercars')) return 'DiscoverCars'
+  if (f.includes('sunnycars')) return 'Sunny Cars'
+  if (f.includes('eldan')) return 'אלדן'
+  return 'השכרת רכב'
+}
+
+function resolveCarCategory(txt: string): CarRental['carCategory'] {
+  const t = txt.toLowerCase()
+  if (/\bluxury\b|premium|elite|prestige/i.test(t)) return 'luxury'
+  if (/\bvan\b|minivan|minibus/i.test(t)) return 'van'
+  if (/\bsuv\b|crossover|4x4|4wd/i.test(t)) return 'suv'
+  if (/full.?size|full.?class|standard|large/i.test(t)) return 'full-size'
+  if (/mid.?size|medium|intermediate/i.test(t)) return 'midsize'
+  if (/compact/i.test(t)) return 'compact'
+  return 'economy'
+}
+
+function parseCarRentalFromText(txt: string, from: string, subject: string): Omit<CarRental, 'id'> | null {
+  const pickupMatch =
+    /(?:pick.?up\s*(?:date|time)?|collection\s*(?:date)?|איסוף)[:\s]+([^\n,|]{5,40})/i.exec(txt) ??
+    /(?:rental\s*starts?|from)[:\s]+([^\n,|]{5,40})/i.exec(txt)
+
+  const dropoffMatch =
+    /(?:drop.?off\s*(?:date|time)?|return\s*(?:date)?|החזרה)[:\s]+([^\n,|]{5,40})/i.exec(txt) ??
+    /(?:rental\s*ends?|until|to)[:\s]+([^\n,|]{5,40})/i.exec(txt)
+
+  if (!pickupMatch && !dropoffMatch) return null
+
+  const pickupLocationMatch =
+    /(?:pick.?up\s*location|pick.?up\s*at|pickup\s*office|station|branch|מיקום\s*איסוף)[:\s]+([^\n,|]{3,60})/i.exec(txt) ??
+    /(?:location)[:\s]+([^\n,|]{3,60})/i.exec(txt)
+
+  const dropoffLocationMatch =
+    /(?:drop.?off\s*location|return\s*(?:to|at)|return\s*location|מיקום\s*החזרה)[:\s]+([^\n,|]{3,60})/i.exec(txt)
+
+  const confirmMatch =
+    /(?:reservation|booking|confirmation|reference|voucher|אישור|הזמנה)\s*(?:#|number|num|no\.?|code|מספר)?[:\s]*([A-Z0-9]{4,20})/i.exec(txt)
+
+  const carTypeMatch =
+    /(?:vehicle\s*(?:type|class|group)|car\s*(?:type|class|group)|category|group)[:\s]+([^\n,|]{3,40})/i.exec(txt)
+
+  const carModelMatch =
+    /(?:car\s*model|vehicle\s*model|vehicle)[:\s]+([^\n]{3,30})/i.exec(txt)
+
+  const driverMatch =
+    /(?:driver|lead\s*driver|נהג\s*ראשי|שם\s*נהג)[:\s]+([^\n,|]{3,40})/i.exec(txt)
+
+  const priceMatch = PRICE_RE.exec(txt)
+  const cost = priceMatch ? parseFloat((priceMatch[1] ?? priceMatch[2]).replace(/,/g, '')) : 0
+  const currency = /EUR|€/.test(txt) ? 'EUR' : /USD|\$/.test(txt) ? 'USD' : 'ILS'
+
+  const includesInsurance = /(?:full\s*(?:coverage|protection)|cdw|collision\s*damage|super\s*cover|ביטוח\s*כלול)/i.test(txt)
+
+  const pickupDate = isoDate(pickupMatch?.[1] ?? '') || isoDate(new Date().toISOString())
+  const dropoffDate = isoDate(dropoffMatch?.[1] ?? '') || pickupDate
+
+  const pickupLocation = pickupLocationMatch?.[1]?.trim() ?? find(subject, /(?:at|ב|–|-)\s*(.+)$/) ?? ''
+  const dropoffLocation = dropoffLocationMatch?.[1]?.trim()
+
+  const carCategory = resolveCarCategory(carTypeMatch?.[1] ?? txt.slice(0, 300))
+
+  return {
+    company: resolveCarCompany(from),
+    carModel: carModelMatch?.[1]?.trim(),
+    carCategory,
+    pickupLocation,
+    dropoffLocation: dropoffLocation !== pickupLocation ? dropoffLocation : undefined,
+    pickupDate,
+    dropoffDate,
+    cost,
+    currency,
+    confirmationNumber: confirmMatch?.[1],
+    driverName: driverMatch?.[1]?.trim(),
+    includesInsurance,
+  }
+}
+
 // ── Event Parser ─────────────────────────────────────────────────────────────
 
 function parseEventFromText(txt: string, subject: string): Omit<TripEvent, 'id' | 'dayId'> | null {
@@ -210,6 +304,9 @@ function parseEventFromText(txt: string, subject: string): Omit<TripEvent, 'id' 
 
 // ── Classifier ───────────────────────────────────────────────────────────────
 
+const CAR_RENTAL_FROM_RE = /hertz|avis|budget|europcar|sixt|shlomo|alamo|enterprise|nationalcar|dollar|thrifty|rentalcars|autoeurope|discovercars|sunnycars|eldan/i
+const CAR_RENTAL_SUBJ_RE = /car\s*rental|rent.a.car|vehicle\s*rental|reservation|השכרת\s*רכב|אישור\s*הזמנה/i
+
 function classify(msg: GmailMessage): ParsedEmailType {
   const from = msg.from.toLowerCase()
   const subj = msg.subject.toLowerCase()
@@ -217,6 +314,8 @@ function classify(msg: GmailMessage): ParsedEmailType {
 
   if (/el\s*al|ryanair|easyjet|wizzair|lufthansa|israir|arkia|turkish|flight|טיסה/i.test(`${from} ${subj}`)) return 'flight'
   if (/booking\.com|airbnb|hotels\.com|hostelworld|מלון|hotel|check.in/i.test(`${from} ${subj} ${body}`)) return 'accommodation'
+  if (CAR_RENTAL_FROM_RE.test(from) || (CAR_RENTAL_FROM_RE.test(from) && CAR_RENTAL_SUBJ_RE.test(subj))) return 'car-rental'
+  if (CAR_RENTAL_SUBJ_RE.test(subj) && /pick.?up|drop.?off|איסוף|החזרה/i.test(`${subj} ${body}`)) return 'car-rental'
   if (/getyourguide|viator|klook|activity|tour|tickets?/i.test(`${from} ${subj}`)) return 'event'
   if (FLIGHT_NUM_RE.test(body)) return 'flight'
   return 'unknown'
@@ -251,6 +350,11 @@ export function parseEmails(messages: GmailMessage[]): ParsedEmail[] {
     if (type === 'accommodation') {
       const accommodation = parseAccommodationFromText(txt, msg.subject)
       if (accommodation) return [{ ...base, messageId: msg.id, type: 'accommodation', accommodation }]
+    }
+
+    if (type === 'car-rental') {
+      const carRental = parseCarRentalFromText(txt, msg.from, msg.subject)
+      if (carRental) return [{ ...base, messageId: msg.id, type: 'car-rental', carRental }]
     }
 
     if (type === 'event') {

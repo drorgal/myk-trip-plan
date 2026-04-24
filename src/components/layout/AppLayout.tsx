@@ -61,7 +61,7 @@ const NavItems = [
   { label: 'משפחה', path: 'family', icon: <Users size={18} /> },
   { label: 'משימות', path: 'tasks', icon: <ListTodo size={18} /> },
   { label: 'תקציב', path: 'budget', icon: <Wallet size={18} /> },
-  { label: 'טיסות ולינה', path: 'travel', icon: <Plane size={18} /> },
+  { label: 'טיסות, לינה ורכב', path: 'travel', icon: <Plane size={18} /> },
 ]
 
 export default function AppLayout() {

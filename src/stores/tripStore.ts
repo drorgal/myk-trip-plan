@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { TripPlan } from '@/types/trip-plan'
 import type { TripEvent, TripDay } from '@/types/trip'
 import type { BudgetItem } from '@/types/budget'
-import type { Flight, Accommodation } from '@/types/accommodation'
+import type { Flight, Accommodation, CarRental } from '@/types/accommodation'
 import type { FamilyMember } from '@/types/family'
 import type { TripTask } from '@/types/task'
 import type { PackingItem } from '@/types/packing'
@@ -37,6 +37,10 @@ interface TripStore {
   addAccommodation: (tripId: string, acc: Omit<Accommodation, 'id'>) => void
   updateAccommodation: (tripId: string, accId: string, patch: Partial<Accommodation>) => void
   removeAccommodation: (tripId: string, accId: string) => void
+
+  addCarRental: (tripId: string, rental: Omit<CarRental, 'id'>) => void
+  updateCarRental: (tripId: string, rentalId: string, patch: Partial<CarRental>) => void
+  removeCarRental: (tripId: string, rentalId: string) => void
 
   addFamilyMember: (tripId: string, member: Omit<FamilyMember, 'id'>) => void
   updateFamilyMember: (tripId: string, memberId: string, patch: Partial<Omit<FamilyMember, 'id'>>) => void
@@ -90,6 +94,7 @@ export const useTripStore = create<TripStore>()(
           budget: { currency: 'ILS', totalBudget: 0, items: [] },
           accommodations: [],
           flights: [],
+          carRentals: [],
           packingItems: [],
           createdAt: now,
           updatedAt: now,
@@ -232,6 +237,30 @@ export const useTripStore = create<TripStore>()(
           trips: updateTrip(state.trips, tripId, t => touch({
             ...t,
             accommodations: t.accommodations.filter(a => a.id !== accId),
+          })),
+        })),
+
+      addCarRental: (tripId, rental) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            carRentals: [...(t.carRentals ?? []), { ...rental, id: generateId() }],
+          })),
+        })),
+
+      updateCarRental: (tripId, rentalId, patch) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            carRentals: (t.carRentals ?? []).map(r => (r.id === rentalId ? { ...r, ...patch } : r)),
+          })),
+        })),
+
+      removeCarRental: (tripId, rentalId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            carRentals: (t.carRentals ?? []).filter(r => r.id !== rentalId),
           })),
         })),
 
@@ -392,6 +421,7 @@ export const useTripStore = create<TripStore>()(
           ...t,
           tasks: t.tasks ?? [],
           packingItems: t.packingItems ?? [],
+          carRentals: t.carRentals ?? [],
         }))
       },
     }

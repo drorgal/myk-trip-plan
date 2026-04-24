@@ -94,11 +94,22 @@ function getHeader(headers: Array<{ name: string; value: string }>, name: string
 }
 
 export async function fetchTravelEmails(token: string): Promise<GmailMessage[]> {
-  const query = ['from:elal-ticketing.com',
-    'from:elal.co.il', 'from:israir.co.il', 'from:ryanair.com',
-    'from:easyjet.com', 'from:wizzair.com', 'from:lufthansa.com',
+  const query = [
+    // Airlines
+    'from:elal-ticketing.com', 'from:elal.co.il', 'from:israir.co.il',
+    'from:ryanair.com', 'from:easyjet.com', 'from:wizzair.com', 'from:lufthansa.com',
+    // Accommodations
     'from:booking.com', 'from:airbnb.com', 'from:hotels.com',
-    'from:getyourguide.com', 'from:viator.com','from:arbitrip.com',
+    // Activities
+    'from:getyourguide.com', 'from:viator.com', 'from:arbitrip.com',
+    // Car rentals — international
+    'from:hertz.com', 'from:avis.com', 'from:budget.com', 'from:europcar.com',
+    'from:sixt.com', 'from:alamo.com', 'from:enterprise.com', 'from:nationalcar.com',
+    'from:dollar.com', 'from:thrifty.com', 'from:rentalcars.com', 'from:autoeurope.com',
+    'from:discovercars.com', 'from:sunnycars.com',
+    // Car rentals — Israel
+    'from:eldan.co.il', 'from:shlomo.co.il', 'from:hertz.co.il',
+    'from:avis.co.il', 'from:budget.co.il', 'from:europcar.co.il',
   ].join(' OR ')
 
   const listRes = await gmailFetch(token, `/messages?q=(${query}) newer_than:2y&maxResults=30`) as { messages?: Array<{ id: string }> }

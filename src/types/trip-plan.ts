@@ -1,6 +1,6 @@
 import type { TripDay } from './trip'
 import type { Budget } from './budget'
-import type { Accommodation, Flight } from './accommodation'
+import type { Accommodation, CarRental, Flight } from './accommodation'
 import type { FamilyMember, ID } from './family'
 import type { TripTask } from './task'
 import type { PackingItem } from './packing'
@@ -23,6 +23,7 @@ export interface TripPlan {
   budget: Budget
   accommodations: Accommodation[]
   flights: Flight[]
+  carRentals: CarRental[]
   packingItems: PackingItem[]
   coords?: TripCoords
   createdAt: string

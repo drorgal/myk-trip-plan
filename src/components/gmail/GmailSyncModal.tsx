@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal, Button, Stack, Typography, Badge, Alert } from 'myk-library'
-import { Mail, Plane, Home as HomeIcon, Calendar, Loader } from 'lucide-react'
+import { Mail, Plane, Home as HomeIcon, Calendar, Car, Loader } from 'lucide-react'
 import { authorizeGmail, fetchTravelEmails, isGmailEnabled } from '@/services/gmail'
 import { parseEmails, type ParsedEmail } from '@/services/emailParser'
 import { useTripStore } from '@/stores/tripStore'
@@ -25,12 +25,14 @@ const EmailRow = styled.div<{ $selected: boolean }>`
 const TypeIcon = ({ type }: { type: ParsedEmail['type'] }) => {
   if (type === 'flight') return <Plane size={16} color="#6366f1" />
   if (type === 'accommodation') return <HomeIcon size={16} color="#10b981" />
+  if (type === 'car-rental') return <Car size={16} color="#f59e0b" />
   return <Calendar size={16} color="#f59e0b" />
 }
 
 const typeLabel = (type: ParsedEmail['type']) => {
   if (type === 'flight') return 'טיסה'
   if (type === 'accommodation') return 'לינה'
+  if (type === 'car-rental') return 'רכב'
   return 'אירוע'
 }
 
@@ -45,6 +47,7 @@ type Step = 'idle' | 'loading' | 'review' | 'done'
 export default function GmailSyncModal({ open, onClose, tripId }: Props) {
   const addFlight = useTripStore(s => s.addFlight)
   const addAccommodation = useTripStore(s => s.addAccommodation)
+  const addCarRental = useTripStore(s => s.addCarRental)
   const addEvent = useTripStore(s => s.addEvent)
   const trips = useTripStore(s => s.trips)
 
@@ -92,6 +95,8 @@ export default function GmailSyncModal({ open, onClose, tripId }: Props) {
         addFlight(tripId, item.flight)
       } else if (item.type === 'accommodation' && item.accommodation) {
         addAccommodation(tripId, item.accommodation)
+      } else if (item.type === 'car-rental' && item.carRental) {
+        addCarRental(tripId, item.carRental)
       } else if (item.type === 'event' && item.event) {
         const firstDay = trip.days[0]?.date ?? trip.startDate
         addEvent(tripId, firstDay, item.event)
@@ -130,7 +135,7 @@ export default function GmailSyncModal({ open, onClose, tripId }: Props) {
         {step === 'idle' && (
           <>
             <Typography variant="body1" style={{ color: '#6b7280' }}>
-              האפליקציה תחפש מיילי אישור של טיסות, לינה ופעילויות ותייבא אותם לטיול שלך.
+              האפליקציה תחפש מיילי אישור של טיסות, לינה, השכרת רכב ופעילויות ותייבא אותם לטיול שלך.
             </Typography>
             <Typography variant="body2" style={{ color: '#9ca3af' }}>
               גישה לקריאה בלבד — לא נשמר, לא נשתף.

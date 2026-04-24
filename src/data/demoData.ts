@@ -195,4 +195,5 @@ export const DEMO_TRIP: TripPlan = {
     },
   ],
   packingItems: [],
+  carRentals: [],
 }

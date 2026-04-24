@@ -7,9 +7,10 @@ import { useTripStore } from '@/stores/tripStore'
 import { formatCurrency } from '@/utils/currency'
 import FlightFormModal from '@/components/travel/FlightFormModal'
 import AccommodationFormModal from '@/components/travel/AccommodationFormModal'
+import CarRentalFormModal from '@/components/travel/CarRentalFormModal'
 import GmailSyncModal from '@/components/gmail/GmailSyncModal'
-import type { Flight, Accommodation } from '@/types/accommodation'
-import { Plus, Pencil, Trash2, Plane, Hotel, Mail } from 'lucide-react'
+import type { Flight, Accommodation, CarRental, CarCategory } from '@/types/accommodation'
+import { Plus, Pencil, Trash2, Plane, Hotel, Car, Mail } from 'lucide-react'
 import styled from 'styled-components'
 import { parseISO, format } from 'date-fns'
 import { he } from 'date-fns/locale'
@@ -28,20 +29,27 @@ const formatDateOnly = (d: string) => {
 
 const CABIN_LABEL: Record<string, string> = { economy: 'תיירות', business: 'עסקים', first: 'ראשונה' }
 const TYPE_LABEL: Record<string, string> = { hotel: '🏨 מלון', airbnb: '🏠 Airbnb', hostel: '🛏️ הוסטל', villa: '🏡 וילה', other: '🏢 אחר' }
+const CAR_CATEGORY_LABEL: Record<CarCategory, string> = {
+  economy: '🚗 קטנה', compact: '🚗 קומפקט', midsize: '🚙 בינונית',
+  'full-size': '🚙 גדולה', suv: '🚐 SUV', van: '🚌 ואן', luxury: '🏎️ יוקרה',
+}
 
 export default function Travel() {
   const { id } = useParams<{ id: string }>()
   const trip = useTripStore(s => s.trips.find(t => t.id === id))
   const removeFlight = useTripStore(s => s.removeFlight)
   const removeAccommodation = useTripStore(s => s.removeAccommodation)
+  const removeCarRental = useTripStore(s => s.removeCarRental)
 
   const [showAddFlight, setShowAddFlight] = useState(false)
   const [editFlight, setEditFlight] = useState<Flight | undefined>()
   const [showAddAcc, setShowAddAcc] = useState(false)
   const [editAcc, setEditAcc] = useState<Accommodation | undefined>()
+  const [showAddCar, setShowAddCar] = useState(false)
+  const [editCar, setEditCar] = useState<CarRental | undefined>()
   const [showGmail, setShowGmail] = useState(false)
 
-  const { isMobile, isTablet } = useBreakpoint()
+  const { isMobile } = useBreakpoint()
 
   if (!trip) return null
 
@@ -80,6 +88,32 @@ export default function Travel() {
                 </Stack>
               )}
             </>
+          )}
+        </Stack>
+      ),
+    },
+    {
+      key: 'car-rental',
+      label: 'רכב',
+      children: (
+        <Stack direction="column" spacing="md" style={{ paddingTop: 16 }}>
+          <Stack direction="row" justify="between" align="center">
+            <Typography variant="h6" style={{ margin: 0 }}>🚗 השכרות רכב ({(trip.carRentals ?? []).length})</Typography>
+            <Button size="sm" variant="primary" onClick={() => setShowAddCar(true)}>
+              <Stack direction="row" spacing="xs" align="center">
+                <Plus size={14} /><span>הוסף רכב</span>
+              </Stack>
+            </Button>
+          </Stack>
+
+          {(trip.carRentals ?? []).length === 0 ? (
+            <EmptyState title="אין השכרות רכב" description="הוסף פרטי השכרת רכב לטיול שלך" />
+          ) : (
+            <Stack direction="column" spacing="md">
+              {(trip.carRentals ?? []).map(rental => (
+                <CarRentalCard key={rental.id} rental={rental} tripId={trip.id} onEdit={setEditCar} onDelete={removeCarRental} isMobile={isMobile} />
+              ))}
+            </Stack>
           )}
         </Stack>
       ),
@@ -131,6 +165,10 @@ export default function Travel() {
       {editAcc && (
         <AccommodationFormModal open={!!editAcc} onClose={() => setEditAcc(undefined)} tripId={trip.id} editAcc={editAcc} />
       )}
+      <CarRentalFormModal open={showAddCar} onClose={() => setShowAddCar(false)} tripId={trip.id} />
+      {editCar && (
+        <CarRentalFormModal open={!!editCar} onClose={() => setEditCar(undefined)} tripId={trip.id} editRental={editCar} />
+      )}
       <GmailSyncModal open={showGmail} onClose={() => setShowGmail(false)} tripId={trip.id} />
     </PageWrapper>
   )
@@ -166,6 +204,44 @@ function FlightCard({ flight, tripId, onEdit, onDelete, isMobile }: { flight: Fl
           <Stack direction="row" spacing="xs">
             <ActionIcon size="sm" variant="subtle" onClick={() => onEdit(flight)}><Pencil size={12} /></ActionIcon>
             <ActionIcon size="sm" variant="subtle" onClick={() => onDelete(tripId, flight.id)}><Trash2 size={12} /></ActionIcon>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Card>
+  )
+}
+
+function CarRentalCard({ rental, tripId, onEdit, onDelete, isMobile }: { rental: CarRental; tripId: string; onEdit: (r: CarRental) => void; onDelete: (tid: string, rid: string) => void; isMobile: boolean }) {
+  return (
+    <Card variant="outlined" padding="md">
+      <Stack direction={isMobile ? 'column' : 'row'} justify="between" align="start" spacing={isMobile ? 'sm' : undefined}>
+        <Stack direction="column" spacing="xs">
+          <Stack direction="row" spacing="sm" align="center">
+            <Car size={16} />
+            <Typography variant="body1" style={{ fontWeight: 600 }}>{rental.company}</Typography>
+            <Badge size="sm" variant="info">{CAR_CATEGORY_LABEL[rental.carCategory]}</Badge>
+          </Stack>
+          {rental.carModel && <Typography variant="body2" style={{ color: '#6b7280' }}>🚗 {rental.carModel}</Typography>}
+          <Typography variant="body2">
+            📍 {rental.pickupLocation}
+            {rental.dropoffLocation && rental.dropoffLocation !== rental.pickupLocation && ` → ${rental.dropoffLocation}`}
+          </Typography>
+          <Typography variant="body2" style={{ color: '#6b7280' }}>
+            {formatDateOnly(rental.pickupDate)} – {formatDateOnly(rental.dropoffDate)}
+          </Typography>
+          <Stack direction="row" spacing="sm">
+            {rental.includesInsurance && <Chip size="sm" variant="success">ביטוח כלול</Chip>}
+            {rental.driverName && <Chip size="sm">👤 {rental.driverName}</Chip>}
+            {rental.confirmationNumber && <Chip size="sm">{rental.confirmationNumber}</Chip>}
+          </Stack>
+        </Stack>
+        <Stack direction={isMobile ? 'row' : 'column'} align={isMobile ? 'center' : 'end'} justify={isMobile ? 'between' : undefined} spacing="xs" style={isMobile ? { width: '100%' } : undefined}>
+          <Typography variant="h6" style={{ margin: 0, color: '#059669' }}>
+            {formatCurrency(rental.cost, rental.currency)}
+          </Typography>
+          <Stack direction="row" spacing="xs">
+            <ActionIcon size="sm" variant="subtle" onClick={() => onEdit(rental)}><Pencil size={12} /></ActionIcon>
+            <ActionIcon size="sm" variant="subtle" onClick={() => onDelete(tripId, rental.id)}><Trash2 size={12} /></ActionIcon>
           </Stack>
         </Stack>
       </Stack>

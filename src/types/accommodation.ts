@@ -2,6 +2,7 @@ import type { ID } from './family'
 
 export type AccommodationType = 'hotel' | 'airbnb' | 'hostel' | 'villa' | 'other'
 export type CabinClass = 'economy' | 'business' | 'first'
+export type CarCategory = 'economy' | 'compact' | 'midsize' | 'full-size' | 'suv' | 'van' | 'luxury'
 
 export interface Accommodation {
   id: ID
@@ -15,6 +16,23 @@ export interface Accommodation {
   confirmationNumber?: string
   notes?: string
   rating?: number
+}
+
+export interface CarRental {
+  id: ID
+  company: string
+  carModel?: string
+  carCategory: CarCategory
+  pickupLocation: string
+  dropoffLocation?: string
+  pickupDate: string
+  dropoffDate: string
+  cost: number
+  currency: string
+  confirmationNumber?: string
+  driverName?: string
+  includesInsurance?: boolean
+  notes?: string
 }
 
 export interface Flight {
