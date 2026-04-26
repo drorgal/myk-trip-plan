@@ -5,10 +5,11 @@ import { useBreakpoint } from '@/hooks/useBreakpoint'
 import { useWeather } from '@/hooks/useWeather'
 import DayColumn from '@/components/itinerary/DayColumn'
 import GmailSyncModal from '@/components/gmail/GmailSyncModal'
+import AiItineraryModal from '@/components/ai/AiItineraryModal'
 import { Stack, Typography, Badge, Button, Grid } from 'myk-library'
 import { getTripDuration } from '@/utils/date'
 import { formatDateShort } from '@/utils/date'
-import { Mail, History } from 'lucide-react'
+import { Mail, History, Sparkles } from 'lucide-react'
 import styled from 'styled-components'
 import { useDestinationCacheStore } from '@/stores/destinationCacheStore'
 
@@ -36,6 +37,7 @@ export default function Itinerary() {
   const { id } = useParams<{ id: string }>()
   const trip = useTripStore(s => s.trips.find(t => t.id === id))
   const [showGmail, setShowGmail] = useState(false)
+  const [showAiBuilder, setShowAiBuilder] = useState(false)
 
   const { isMobile } = useBreakpoint()
   const { weather } = useWeather(id ?? '')
@@ -59,14 +61,24 @@ export default function Itinerary() {
               {formatDateShort(trip.startDate)} – {formatDateShort(trip.endDate)}
             </Typography>
           </Stack>
-          <Button size="sm" variant="ghost" onClick={() => setShowGmail(true)}>
-            <Stack direction="row" spacing="xs" align="center">
-              <Mail size={14} /><span>סנכרן מ-Gmail</span>
-            </Stack>
-          </Button>
+          <Stack direction="row" spacing="sm">
+            <Button size="sm" variant="primary" onClick={() => setShowAiBuilder(true)}>
+              <Stack direction="row" spacing="xs" align="center">
+                <Sparkles size={14} /><span>בנה לי מסלול עם AI</span>
+              </Stack>
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowGmail(true)}>
+              <Stack direction="row" spacing="xs" align="center">
+                <Mail size={14} /><span>סנכרן מ-Gmail</span>
+              </Stack>
+            </Button>
+          </Stack>
         </PageHeaderRow>
       </PageHeader>
       {showGmail && <GmailSyncModal open={showGmail} onClose={() => setShowGmail(false)} tripId={trip.id} />}
+      {showAiBuilder && (
+        <AiItineraryModal open={showAiBuilder} onClose={() => setShowAiBuilder(false)} tripId={trip.id} />
+      )}
 
       {pastVisits.length > 0 && !hidePastVisit && (
         <div style={{ margin: `12px ${isMobile ? '12px' : '24px'} 0`, background: 'rgba(59,130,246,0.12)', border: '1.5px solid #3b82f6', borderRadius: 10, padding: '10px 14px' }}>

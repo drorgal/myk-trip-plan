@@ -3,7 +3,7 @@ import type { TripPlan } from '@/types/trip-plan'
 export const DEMO_TRIP: TripPlan = {
   id: 'demo-italy-2026',
   name: 'טיול משפחתי לאיטליה',
-  destination: 'איטליה',
+  destination: 'Rome, Italy',
   startDate: '2026-07-10',
   endDate: '2026-07-17',
   coverEmoji: '🏖️',
@@ -194,6 +194,38 @@ export const DEMO_TRIP: TripPlan = {
       ],
     },
   ],
-  packingItems: [],
   carRentals: [],
+  packingItems: [
+    // מסמכים
+    { id: 'demo-p1', title: 'דרכון', category: 'documents', packed: true, notes: 'בתוקף עד 2028' },
+    { id: 'demo-p2', title: 'כרטיסי טיסה', category: 'documents', packed: true },
+    { id: 'demo-p3', title: 'אישורי מלון', category: 'documents', packed: true },
+    { id: 'demo-p4', title: 'ביטוח נסיעות', category: 'documents', packed: false },
+    { id: 'demo-p5', title: 'כרטיס אשראי + מזומן', category: 'documents', packed: true },
+    // ביגוד
+    { id: 'demo-p6', title: 'חולצות', category: 'clothing', packed: true, quantity: 6 },
+    { id: 'demo-p7', title: 'מכנסיים קצרים', category: 'clothing', packed: true, quantity: 3 },
+    { id: 'demo-p8', title: 'מכנסיים ארוכים', category: 'clothing', packed: true, quantity: 1, notes: 'לביקור בוותיקן' },
+    { id: 'demo-p9', title: 'כובע', category: 'clothing', packed: false, quantity: 4, notes: '4 כובעים לכל המשפחה' },
+    { id: 'demo-p10', title: 'נעליים נוחות', category: 'clothing', packed: true },
+    { id: 'demo-p11', title: 'בגדי שחייה', category: 'clothing', packed: false, quantity: 4 },
+    { id: 'demo-p12', title: 'ז׳קט קל', category: 'clothing', packed: false, quantity: 2 },
+    // טיפוח
+    { id: 'demo-p13', title: 'קרם הגנה SPF50', category: 'toiletries', packed: true, quantity: 2 },
+    { id: 'demo-p14', title: 'מברשות שיניים', category: 'toiletries', packed: true, quantity: 4 },
+    { id: 'demo-p15', title: 'משחת שיניים', category: 'toiletries', packed: true },
+    { id: 'demo-p16', title: 'שמפו + מרכך', category: 'toiletries', packed: false },
+    { id: 'demo-p17', title: 'קרם לחות', category: 'toiletries', packed: false },
+    // אלקטרוניקה
+    { id: 'demo-p18', title: 'מטענים לטלפון', category: 'electronics', packed: true, quantity: 2 },
+    { id: 'demo-p19', title: 'מצלמה + מטען', category: 'electronics', packed: false },
+    { id: 'demo-p20', title: 'מתאם חשמל אירופי', category: 'electronics', packed: false, notes: 'חשמל באיטליה 220V' },
+    { id: 'demo-p21', title: 'אוזניות', category: 'electronics', packed: true, quantity: 2 },
+    { id: 'demo-p22', title: 'בנק סוללה', category: 'electronics', packed: false },
+    // אחר
+    { id: 'demo-p23', title: 'תרופות ושיפוים', category: 'other', packed: true, notes: 'כאב ראש, בטן, אנטיהיסטמין' },
+    { id: 'demo-p24', title: 'בקבוקי מים', category: 'other', packed: false, quantity: 4 },
+    { id: 'demo-p25', title: 'ספר לנסיעה', category: 'other', packed: false },
+    { id: 'demo-p26', title: 'מדריך איטליה', category: 'other', packed: true },
+  ],
 }

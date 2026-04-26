@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useParams, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import AiChatDrawer from '@/components/ai/AiChatDrawer'
 import {
   AppShell, Navbar, Sidebar, Drawer,
   SidebarContent, SidebarNavItem, SidebarSection, SidebarSectionTitle,
@@ -208,6 +209,8 @@ export default function AppLayout() {
       >
         <Outlet />
       </AppShell>
+
+      <AiChatDrawer />
 
       {isTablet && (
         <Drawer
