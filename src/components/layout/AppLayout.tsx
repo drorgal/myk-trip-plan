@@ -85,10 +85,6 @@ export default function AppLayout() {
     }
   }, [id, activeTripId, setActiveTrip])
 
-  // close drawer on navigation
-  useEffect(() => {
-    setDrawerOpen(false) // eslint-disable-line react-hooks/set-state-in-effect
-  }, [location.pathname])
 
   if (!trip) return <Navigate to="/" replace />
 
@@ -103,7 +99,7 @@ export default function AppLayout() {
             key={item.path}
             $active={currentPath === item.path}
             $collapsed={false}
-            onClick={() => navigate(`/trip/${id}/${item.path}`)}
+            onClick={() => { setDrawerOpen(false); navigate(`/trip/${id}/${item.path}`) }}
             title={item.label}
           >
             <NavIcon>{item.icon}</NavIcon>

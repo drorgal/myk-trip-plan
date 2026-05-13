@@ -41,16 +41,15 @@ export function useWeather(tripId: string): UseWeatherResult {
     if (!trip) return
 
     const cacheKey = `${CACHE_KEY_PREFIX}${tripId}`
-    const cached = getCached(cacheKey)
-    if (cached) {
-      setWeather(cached) // eslint-disable-line react-hooks/set-state-in-effect
-      return
-    }
-
     let cancelled = false
 
     async function load() {
       if (!trip) return
+      const cached = getCached(cacheKey)
+      if (cached) {
+        if (!cancelled) setWeather(cached)
+        return
+      }
       setLoading(true)
       try {
         let coords = trip.coords ?? null
