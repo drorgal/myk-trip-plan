@@ -4,6 +4,7 @@ import type { Accommodation, CarRental, Flight } from './accommodation'
 import type { FamilyMember, ID } from './family'
 import type { TripTask } from './task'
 import type { PackingItem } from './packing'
+import type { RouteFramework } from './route-framework'
 
 export interface TripCoords {
   lat: number
@@ -26,6 +27,7 @@ export interface TripPlan {
   carRentals: CarRental[]
   packingItems: PackingItem[]
   coords?: TripCoords
+  routeFramework?: RouteFramework
   createdAt: string
   updatedAt: string
 }

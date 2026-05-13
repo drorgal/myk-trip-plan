@@ -8,6 +8,7 @@ import type { FamilyMember } from '@/types/family'
 import type { TripTask } from '@/types/task'
 import type { PackingItem } from '@/types/packing'
 import type { TripCoords } from '@/types/trip-plan'
+import type { RouteStop, TravelLeg } from '@/types/route-framework'
 import { generateId } from '@/utils/id'
 import { getDaysBetween } from '@/utils/date'
 import { DEMO_TRIP } from '@/data/demoData'
@@ -52,6 +53,14 @@ interface TripStore {
   removeTask: (tripId: string, taskId: string) => void
 
   setCoords: (tripId: string, coords: TripCoords) => void
+
+  addRouteStop: (tripId: string, stop: Omit<RouteStop, 'id' | 'order'>) => void
+  updateRouteStop: (tripId: string, stopId: string, patch: Partial<RouteStop>) => void
+  removeRouteStop: (tripId: string, stopId: string) => void
+  reorderRouteStops: (tripId: string, orderedIds: string[]) => void
+  addTravelLeg: (tripId: string, leg: Omit<TravelLeg, 'id'>) => void
+  updateTravelLeg: (tripId: string, legId: string, patch: Partial<TravelLeg>) => void
+  removeTravelLeg: (tripId: string, legId: string) => void
 
   addPackingItem: (tripId: string, item: Omit<PackingItem, 'id'>) => void
   updatePackingItem: (tripId: string, itemId: string, patch: Partial<Omit<PackingItem, 'id'>>) => void
@@ -360,6 +369,89 @@ export const useTripStore = create<TripStore>()(
       setCoords: (tripId, coords) =>
         set(state => ({
           trips: updateTrip(state.trips, tripId, t => ({ ...t, coords })),
+        })),
+
+      addRouteStop: (tripId, stop) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const stops = t.routeFramework?.stops ?? []
+            const newStop: RouteStop = { ...stop, id: generateId(), order: stops.length }
+            return touch({
+              ...t,
+              routeFramework: { stops: [...stops, newStop], legs: t.routeFramework?.legs ?? [] },
+            })
+          }),
+        })),
+
+      updateRouteStop: (tripId, stopId, patch) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            routeFramework: {
+              stops: (t.routeFramework?.stops ?? []).map(s => s.id === stopId ? { ...s, ...patch } : s),
+              legs: t.routeFramework?.legs ?? [],
+            },
+          })),
+        })),
+
+      removeRouteStop: (tripId, stopId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const stops = (t.routeFramework?.stops ?? [])
+              .filter(s => s.id !== stopId)
+              .map((s, i) => ({ ...s, order: i }))
+            const legs = (t.routeFramework?.legs ?? []).filter(
+              l => l.fromStopId !== stopId && l.toStopId !== stopId
+            )
+            return touch({ ...t, routeFramework: { stops, legs } })
+          }),
+        })),
+
+      reorderRouteStops: (tripId, orderedIds) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const stops = (t.routeFramework?.stops ?? [])
+              .slice()
+              .sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id))
+              .map((s, i) => ({ ...s, order: i }))
+            return touch({ ...t, routeFramework: { stops, legs: t.routeFramework?.legs ?? [] } })
+          }),
+        })),
+
+      addTravelLeg: (tripId, leg) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => {
+            const legs = t.routeFramework?.legs ?? []
+            return touch({
+              ...t,
+              routeFramework: {
+                stops: t.routeFramework?.stops ?? [],
+                legs: [...legs, { ...leg, id: generateId() }],
+              },
+            })
+          }),
+        })),
+
+      updateTravelLeg: (tripId, legId, patch) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            routeFramework: {
+              stops: t.routeFramework?.stops ?? [],
+              legs: (t.routeFramework?.legs ?? []).map(l => l.id === legId ? { ...l, ...patch } : l),
+            },
+          })),
+        })),
+
+      removeTravelLeg: (tripId, legId) =>
+        set(state => ({
+          trips: updateTrip(state.trips, tripId, t => touch({
+            ...t,
+            routeFramework: {
+              stops: t.routeFramework?.stops ?? [],
+              legs: (t.routeFramework?.legs ?? []).filter(l => l.id !== legId),
+            },
+          })),
         })),
 
       addPackingItem: (tripId, item) =>

@@ -8,6 +8,7 @@ import Travel from './pages/Travel'
 import Tasks from './pages/Tasks'
 import Packing from './pages/Packing'
 import Map from './pages/Map'
+import RouteFramework from './pages/RouteFramework'
 import FamilyProfile from './pages/FamilyProfile'
 import AppLayout from './components/layout/AppLayout'
 
@@ -26,6 +27,7 @@ function App() {
         <Route path="travel" element={<Travel />} />
         <Route path="packing" element={<Packing />} />
         <Route path="map" element={<Map />} />
+        <Route path="route" element={<RouteFramework />} />
       </Route>
     </Routes>
   )

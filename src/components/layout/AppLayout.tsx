@@ -8,7 +8,7 @@ import {
 } from 'myk-library'
 import { useTripStore } from '@/stores/tripStore'
 import styled from 'styled-components'
-import { Map, Wallet, Plane, Home, ListTodo, Users, Menu, LayoutDashboard, Backpack, MapPin } from 'lucide-react'
+import { Map, Wallet, Plane, Home, ListTodo, Users, Menu, LayoutDashboard, Backpack, MapPin, Route } from 'lucide-react'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
 
 const TripTitle = styled.div`
@@ -58,6 +58,7 @@ const NavItems = [
   { label: 'דשבורד', path: 'dashboard', icon: <LayoutDashboard size={18} /> },
   { label: 'לוח זמנים', path: 'itinerary', icon: <Map size={18} /> },
   { label: 'מפה', path: 'map', icon: <MapPin size={18} /> },
+  { label: 'מסלול', path: 'route', icon: <Route size={18} /> },
   { label: 'ציוד', path: 'packing', icon: <Backpack size={18} /> },
   { label: 'משפחה', path: 'family', icon: <Users size={18} /> },
   { label: 'משימות', path: 'tasks', icon: <ListTodo size={18} /> },

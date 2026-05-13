@@ -195,6 +195,15 @@ export const DEMO_TRIP: TripPlan = {
     },
   ],
   carRentals: [],
+  routeFramework: {
+    stops: [
+      { id: 'demo-rs1', order: 0, name: 'רומא', daysCount: 4, coords: { lat: 41.9028, lon: 12.4964 } },
+      { id: 'demo-rs2', order: 1, name: 'פירנצה', daysCount: 3, coords: { lat: 43.7696, lon: 11.2558 } },
+    ],
+    legs: [
+      { id: 'demo-rl1', fromStopId: 'demo-rs1', toStopId: 'demo-rs2', mode: 'train', durationMinutes: 90, notes: 'FrecciaRossa' },
+    ],
+  },
   packingItems: [
     // מסמכים
     { id: 'demo-p1', title: 'דרכון', category: 'documents', packed: true, notes: 'בתוקף עד 2028' },
