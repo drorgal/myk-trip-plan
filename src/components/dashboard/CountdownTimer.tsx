@@ -41,14 +41,12 @@ function pad(n: number) {
 }
 
 export default function CountdownTimer({ startDate, endDate }: Props) {
-  const [, forceUpdate] = useState(0)
+  const [now, setNow] = useState(Date.now)
 
   useEffect(() => {
-    const interval = setInterval(() => forceUpdate(n => n + 1), 1000)
+    const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [])
-
-  const now = Date.now()
   const start = new Date(startDate + 'T00:00:00').getTime()
   const end = new Date(endDate + 'T23:59:59').getTime()
 

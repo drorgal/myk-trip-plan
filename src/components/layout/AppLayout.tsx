@@ -87,7 +87,7 @@ export default function AppLayout() {
 
   // close drawer on navigation
   useEffect(() => {
-    setDrawerOpen(false)
+    setDrawerOpen(false) // eslint-disable-line react-hooks/set-state-in-effect
   }, [location.pathname])
 
   if (!trip) return <Navigate to="/" replace />

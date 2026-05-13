@@ -43,7 +43,7 @@ export function useWeather(tripId: string): UseWeatherResult {
     const cacheKey = `${CACHE_KEY_PREFIX}${tripId}`
     const cached = getCached(cacheKey)
     if (cached) {
-      setWeather(cached)
+      setWeather(cached) // eslint-disable-line react-hooks/set-state-in-effect
       return
     }
 
