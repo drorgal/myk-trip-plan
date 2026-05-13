@@ -4,6 +4,7 @@ import { useTripStore } from '@/stores/tripStore'
 import { useBreakpoint } from '@/hooks/useBreakpoint'
 import { useWeather } from '@/hooks/useWeather'
 import DayColumn from '@/components/itinerary/DayColumn'
+import DiscoveryPanel from '@/components/itinerary/DiscoveryPanel'
 import GmailSyncModal from '@/components/gmail/GmailSyncModal'
 import AiItineraryModal from '@/components/ai/AiItineraryModal'
 import { Stack, Typography, Badge, Button, Grid } from 'myk-library'
@@ -111,6 +112,8 @@ export default function Itinerary() {
           ))}
         </div>
       )}
+
+      <DiscoveryPanel tripId={trip.id} destination={trip.destination} days={trip.days} />
 
       <GridWrapper $mobile={isMobile}>
         <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="md" autoFlow="row">

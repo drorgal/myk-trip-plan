@@ -9,6 +9,9 @@ import FlightFormModal from '@/components/travel/FlightFormModal'
 import AccommodationFormModal from '@/components/travel/AccommodationFormModal'
 import CarRentalFormModal from '@/components/travel/CarRentalFormModal'
 import GmailSyncModal from '@/components/gmail/GmailSyncModal'
+import CarRentalSearchTab from '@/components/travel/CarRentalSearch/CarRentalSearchTab'
+import FlightSearchTab from '@/components/travel/FlightSearchTab'
+import HotelSearchTab from '@/components/travel/HotelSearchTab'
 import type { Flight, Accommodation, CarRental, CarCategory } from '@/types/accommodation'
 import { Plus, Pencil, Trash2, Plane, Hotel, Car, Mail } from 'lucide-react'
 import styled from 'styled-components'
@@ -57,6 +60,21 @@ export default function Travel() {
   const returnFlights = trip.flights.filter(f => f.direction === 'return')
 
   const tabs: TabItem[] = [
+    {
+      key: 'flight-search',
+      label: '🔍 חפש טיסות',
+      children: <FlightSearchTab tripId={trip.id} />,
+    },
+    {
+      key: 'hotel-search',
+      label: '🔍 חפש מלונות',
+      children: <HotelSearchTab tripId={trip.id} />,
+    },
+    {
+      key: 'car-search',
+      label: '🔍 חפש רכב',
+      children: <CarRentalSearchTab tripId={trip.id} />,
+    },
     {
       key: 'flights',
       label: 'טיסות',

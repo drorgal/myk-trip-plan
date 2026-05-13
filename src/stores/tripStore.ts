@@ -8,6 +8,7 @@ import type { FamilyMember } from '@/types/family'
 import type { TripTask } from '@/types/task'
 import type { PackingItem } from '@/types/packing'
 import type { TripCoords } from '@/types/trip-plan'
+import type { PriceResult } from '@/types/price-comparison'
 import { generateId } from '@/utils/id'
 import { getDaysBetween } from '@/utils/date'
 import { DEMO_TRIP } from '@/data/demoData'
@@ -15,6 +16,9 @@ import { DEMO_TRIP } from '@/data/demoData'
 interface TripStore {
   trips: TripPlan[]
   activeTripId: string | null
+  selectedBookings: PriceResult[]
+  selectBooking: (result: PriceResult) => void
+  removeBooking: (id: string) => void
 
   setActiveTrip: (id: string | null) => void
   createTrip: (data: Omit<TripPlan, 'id' | 'tasks' | 'days' | 'budget' | 'accommodations' | 'flights' | 'createdAt' | 'updatedAt'>) => TripPlan
@@ -81,6 +85,17 @@ export const useTripStore = create<TripStore>()(
     (set) => ({
       trips: [],
       activeTripId: null,
+      selectedBookings: [],
+
+      selectBooking: (result) =>
+        set(state => ({
+          selectedBookings: state.selectedBookings.find(b => b.id === result.id)
+            ? state.selectedBookings
+            : [...state.selectedBookings, result],
+        })),
+
+      removeBooking: (id) =>
+        set(state => ({ selectedBookings: state.selectedBookings.filter(b => b.id !== id) })),
 
       setActiveTrip: (id) => set({ activeTripId: id }),
 
@@ -410,6 +425,8 @@ export const useTripStore = create<TripStore>()(
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         if (!state) return
+
+        state.selectedBookings = state.selectedBookings ?? []
 
         if (state.trips.length === 0) {
           state.trips = [DEMO_TRIP]

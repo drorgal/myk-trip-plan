@@ -69,11 +69,12 @@ function handleModelChange(e: ChangeEvent<HTMLSelectElement>, updater: (val: str
 }
 
 export default function AiSettings() {
-  const { provider, openaiApiKey, openaiModel, ollamaUrl, ollamaModel, updateSettings, clearHistory, chatHistory } = useAiStore()
+  const { provider, openaiApiKey, openaiModel, ollamaUrl, ollamaModel, rapidApiKey, updateSettings, clearHistory, chatHistory } = useAiStore()
 
   const [localKey, setLocalKey] = useState(openaiApiKey)
   const [localOllamaUrl, setLocalOllamaUrl] = useState(ollamaUrl)
   const [localOllamaModel, setLocalOllamaModel] = useState(ollamaModel)
+  const [localRapidKey, setLocalRapidKey] = useState(rapidApiKey)
   const [saved, setSaved] = useState(false)
 
   const totalMessages = Object.values(chatHistory).reduce((s, msgs) => s + msgs.length, 0)
@@ -83,6 +84,7 @@ export default function AiSettings() {
       openaiApiKey: localKey,
       ollamaUrl: localOllamaUrl,
       ollamaModel: localOllamaModel,
+      rapidApiKey: localRapidKey,
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -173,6 +175,17 @@ export default function AiSettings() {
             </div>
           </>
         )}
+
+        <div>
+          <Label>RapidAPI Key (לחיפוש השכרות רכב)</Label>
+          <StyledInput
+            type="password"
+            value={localRapidKey}
+            onChange={e => setLocalRapidKey(e.target.value)}
+            placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            dir="ltr"
+          />
+        </div>
 
         <Stack direction="row" spacing="sm">
           <Button onClick={handleSave} size="sm">

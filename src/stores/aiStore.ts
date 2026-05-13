@@ -15,6 +15,7 @@ interface AiSettings {
   openaiModel: string
   ollamaUrl: string
   ollamaModel: string
+  rapidApiKey: string
 }
 
 interface AiStore extends AiSettings {
@@ -32,6 +33,7 @@ export const useAiStore = create<AiStore>()(
       openaiModel: 'gpt-4o-mini',
       ollamaUrl: 'http://localhost:11434',
       ollamaModel: 'llama3.2',
+      rapidApiKey: '',
       chatHistory: {},
 
       updateSettings: (patch) => set(state => ({ ...state, ...patch })),
@@ -58,3 +60,8 @@ export const useAiStore = create<AiStore>()(
     }
   )
 )
+
+export function useSearchMode(): 'rapidapi' | 'free' {
+  const rapidApiKey = useAiStore(s => s.rapidApiKey)
+  return rapidApiKey ? 'rapidapi' : 'free'
+}
