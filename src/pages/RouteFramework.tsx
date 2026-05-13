@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button, Stack, Typography, Spinner } from 'myk-library'
 import styled, { keyframes } from 'styled-components'
@@ -253,8 +253,11 @@ export default function RouteFramework() {
   const routeLayerRef = useRef<L.LayerGroup | null>(null)
 
   const framework = trip?.routeFramework
-  const stops: RouteStop[] = framework ? [...framework.stops].sort((a, b) => a.order - b.order) : []
-  const legs: TravelLeg[] = framework?.legs ?? []
+  const stops: RouteStop[] = useMemo(
+    () => framework ? [...framework.stops].sort((a, b) => a.order - b.order) : [],
+    [framework]
+  )
+  const legs: TravelLeg[] = useMemo(() => framework?.legs ?? [], [framework])
   const hasStops = stops.length > 0
   const hasAiKey = aiStore.provider === 'openai' ? !!aiStore.openaiApiKey : true
 
@@ -282,7 +285,7 @@ export default function RouteFramework() {
       mapRef.current = null
       initRef.current = false
     }
-  }, [trip?.id])
+  }, [trip?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Redraw route layer whenever stops/legs change
   useEffect(() => {

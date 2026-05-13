@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Button, Stack } from 'myk-library'
 import styled from 'styled-components'
 import { Plus } from 'lucide-react'
@@ -77,7 +77,7 @@ export default function RouteTimeline({ framework, tripId }: Props) {
   const reorderRouteStops = useTripStore(s => s.reorderRouteStops)
   const [addingStop, setAddingStop] = useState(false)
   const [addingLeg, setAddingLeg] = useState<{ fromStop: RouteStop; toStop: RouteStop } | null>(null)
-  const dragIdRef = useRef<string | null>(null)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
 
   const stops = [...framework.stops].sort((a, b) => a.order - b.order)
   const legs = framework.legs
@@ -85,17 +85,17 @@ export default function RouteTimeline({ framework, tripId }: Props) {
   const getLegBetween = (fromId: string, toId: string) =>
     legs.find(l => l.fromStopId === fromId && l.toStopId === toId)
 
-  const handleDragStart = (id: string) => { dragIdRef.current = id }
+  const handleDragStart = (id: string) => { setDraggingId(id) }
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault() }
   const handleDrop = (targetId: string) => {
-    if (!dragIdRef.current || dragIdRef.current === targetId) return
+    if (!draggingId || draggingId === targetId) return
     const ids = stops.map(s => s.id)
-    const fromIdx = ids.indexOf(dragIdRef.current)
+    const fromIdx = ids.indexOf(draggingId)
     const toIdx = ids.indexOf(targetId)
     ids.splice(fromIdx, 1)
-    ids.splice(toIdx, 0, dragIdRef.current)
+    ids.splice(toIdx, 0, draggingId)
     reorderRouteStops(tripId, ids)
-    dragIdRef.current = null
+    setDraggingId(null)
   }
 
   const totalDays = stops.reduce((s, st) => s + st.daysCount, 0)
@@ -114,7 +114,7 @@ export default function RouteTimeline({ framework, tripId }: Props) {
                 stop={stop}
                 index={i}
                 tripId={tripId}
-                dragging={dragIdRef.current === stop.id}
+                dragging={draggingId === stop.id}
                 onDragStart={() => handleDragStart(stop.id)}
                 onDragOver={handleDragOver}
                 onDrop={() => handleDrop(stop.id)}

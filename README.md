@@ -14,11 +14,13 @@ A modern, Hebrew-first family trip planning app — built with React, TypeScript
 
 ## Features
 
+- 🗺️ **Route Framework** — plan the skeleton of your trip: key areas, days per stop, and travel time between them on an interactive map. AI suggests a route based on your destination, car rentals, flight circularity, and family composition
 - 📅 **Daily Itinerary** — timeline per day with categories and cost tracking
 - 💰 **Budget Management** — planned vs. actual expenses, category breakdown, over-budget alerts
 - ✈️ **Flights & Accommodation** — manage booking confirmations, cabin class, ratings
 - 👨‍👩‍👧‍👦 **Family Members** — add travelers with emoji avatars
 - 📧 **Gmail Sync** — automatically import flights, hotels, and events from confirmation emails
+- 🤖 **AI Assistant** — itinerary generation and place suggestions via OpenAI or local Ollama
 - 📤 **Export / Import** — save and share trip plans as JSON
 - 📱 **PWA** — installable on mobile and desktop
 - 🌐 **Hebrew RTL** — full right-to-left layout with Heebo font
@@ -58,7 +60,7 @@ cp .env.example .env.local
 
 # 4. Start development server
 npm run dev
-# → http://localhost:3001
+# → http://localhost:3002
 ```
 
 ---
@@ -71,7 +73,7 @@ To enable Gmail sync, you need a Google Cloud OAuth 2.0 Client ID:
 2. Create a new project (or use an existing one)
 3. Enable **Gmail API** under APIs & Services
 4. Create **OAuth 2.0 Client ID** (Web application type)
-5. Add authorized origins: `http://localhost:3001` (dev) and your deployed URL
+5. Add authorized origins: `http://localhost:3002` (dev) and your deployed URL
 6. Copy the Client ID to `.env.local`:
    ```
    VITE_GOOGLE_CLIENT_ID=your_client_id_here
@@ -84,7 +86,7 @@ The app only requests **read-only** Gmail access (`gmail.readonly` scope).
 ## Scripts
 
 ```bash
-npm run dev      # Start dev server on http://localhost:3001
+npm run dev      # Start dev server on http://localhost:3002
 npm run build    # TypeScript check + Vite build
 npm run lint     # ESLint
 npm run preview  # Preview production build locally

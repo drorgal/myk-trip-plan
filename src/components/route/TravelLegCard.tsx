@@ -93,10 +93,10 @@ export default function TravelLegCard({ leg, tripId, stops, isLast }: Props) {
             {leg.notes && <Notes title={leg.notes}>· {leg.notes}</Notes>}
           </LegPill>
           <Stack direction="row" spacing="xs">
-            <ActionIcon size="sm" variant="ghost" onClick={() => setEditing(true)}>
+            <ActionIcon size="sm" variant="subtle" onClick={() => setEditing(true)}>
               <Pencil size={12} />
             </ActionIcon>
-            <ActionIcon size="sm" variant="ghost" onClick={() => removeTravelLeg(tripId, leg.id)}>
+            <ActionIcon size="sm" variant="subtle" onClick={() => removeTravelLeg(tripId, leg.id)}>
               <Trash2 size={12} />
             </ActionIcon>
           </Stack>

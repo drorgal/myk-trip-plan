@@ -107,10 +107,10 @@ export default function RouteStopCard({ stop, index, tripId, dragging, onDragSta
         </div>
         <Stack direction="row" spacing="xs" align="center" style={{ flexShrink: 0 }}>
           <Badge variant="warning" size="sm">{stop.daysCount} ימים</Badge>
-          <ActionIcon size="sm" variant="ghost" onClick={() => setEditing(true)}>
+          <ActionIcon size="sm" variant="subtle" onClick={() => setEditing(true)}>
             <Pencil size={13} />
           </ActionIcon>
-          <ActionIcon size="sm" variant="ghost" onClick={() => removeRouteStop(tripId, stop.id)}>
+          <ActionIcon size="sm" variant="subtle" onClick={() => removeRouteStop(tripId, stop.id)}>
             <Trash2 size={13} />
           </ActionIcon>
         </Stack>
